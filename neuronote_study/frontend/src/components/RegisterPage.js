@@ -8,6 +8,8 @@ import {
   Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_ENDPOINTS, axiosConfig } from "../config";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -33,8 +35,20 @@ const RegisterPage = () => {
       alert("Passwords do not match!");
       return;
     }
-    // TODO: Implement registration logic here
+
     console.log("Registration attempt:", formData);
+
+    try {
+      const response = await axios.post(
+        API_ENDPOINTS.REGISTER,
+        formData,
+        axiosConfig
+      );
+      console.log("Registration successful:", response.data);
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
   };
 
   return (

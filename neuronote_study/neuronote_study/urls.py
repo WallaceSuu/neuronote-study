@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from api.views import RegisterUserView
 
 urlpatterns = [
     path('', include('frontend.urls')),
@@ -25,4 +26,5 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('openai/', include('openAI_api.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('register/', RegisterUserView.as_view(), name='register'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
