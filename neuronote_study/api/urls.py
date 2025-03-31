@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ExampleView
+from .views import uploadPDFView
 
 urlpatterns = [
-    path('', ExampleView.as_view(), name='index'),
+    path('upload-pdf/', uploadPDFView.as_view(), name='upload-pdf'),
 ]

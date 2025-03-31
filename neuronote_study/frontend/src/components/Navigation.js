@@ -14,6 +14,7 @@ import {
   alpha,
   Divider,
 } from "@mui/material";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -55,11 +56,11 @@ const LogoText = styled(Typography)(({ theme }) => ({
 }));
 
 // NavButton with hover effect
-const NavButton = styled(Button)(({ theme }) => ({
+const NavButton = styled(Button)(({ theme, active }) => ({
   borderRadius: "8px",
   padding: "6px 16px",
   margin: theme.spacing(0, 0.5),
-  color: theme.palette.text.primary,
+  color: active ? theme.palette.primary.main : theme.palette.text.primary,
   position: "relative",
   overflow: "hidden",
   "&::after": {
@@ -67,7 +68,7 @@ const NavButton = styled(Button)(({ theme }) => ({
     position: "absolute",
     bottom: 0,
     left: "50%",
-    width: 0,
+    width: active ? "80%" : 0,
     height: "2px",
     backgroundColor: theme.palette.primary.main,
     transition: "all 0.3s ease",
@@ -114,6 +115,7 @@ const GlowIconButton = styled(IconButton)(({ theme }) => ({
 const Navigation = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const location = useLocation();
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -137,7 +139,12 @@ const Navigation = () => {
             >
               <MenuIcon />
             </IconButton>
-            <LogoText variant="h6" component="div">
+            <LogoText
+              variant="h6"
+              component={RouterLink}
+              to="/"
+              sx={{ textDecoration: "none" }}
+            >
               <NeuronIcon sx={{ fontSize: 28 }} />
               NEURONOTE
             </LogoText>
@@ -152,10 +159,46 @@ const Navigation = () => {
               justifyContent: "center",
             }}
           >
-            <NavButton color="inherit">Dashboard</NavButton>
-            <NavButton color="inherit">Notes</NavButton>
-            <NavButton color="inherit">Studies</NavButton>
-            <NavButton color="inherit">Analytics</NavButton>
+            <NavButton
+              component={RouterLink}
+              to="/"
+              color="inherit"
+              active={location.pathname === "/"}
+            >
+              Dashboard
+            </NavButton>
+            <NavButton
+              component={RouterLink}
+              to="/submit"
+              color="inherit"
+              active={location.pathname === "/submit"}
+            >
+              Submit PDF
+            </NavButton>
+            <NavButton
+              component={RouterLink}
+              to="/notes"
+              color="inherit"
+              active={location.pathname === "/notes"}
+            >
+              Notes
+            </NavButton>
+            <NavButton
+              component={RouterLink}
+              to="/analytics"
+              color="inherit"
+              active={location.pathname === "/analytics"}
+            >
+              Analytics
+            </NavButton>
+            <NavButton
+              component={RouterLink}
+              to="/about"
+              color="inherit"
+              active={location.pathname === "/about"}
+            >
+              About
+            </NavButton>
           </Box>
 
           {/* Action Icons */}
@@ -203,7 +246,6 @@ const Navigation = () => {
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
               <Divider />
-              <MenuItem onClick={handleClose}>Settings</MenuItem>
               <MenuItem onClick={handleClose}>Logout</MenuItem>
             </Menu>
           </Box>
