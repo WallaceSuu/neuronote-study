@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 import random
 import string
 import uuid
@@ -7,11 +8,8 @@ def generateRandomKey():
     # Use UUID for guaranteed uniqueness 
     return str(uuid.uuid4())
 
-class User(models.Model):
-    username = models.CharField(max_length=255)
-    user_id = models.CharField(max_length=36, default=generateRandomKey, unique=True)
-    email = models.EmailField(max_length=255)
-    password = models.CharField(max_length=255)
+class User(AbstractUser):
+    user_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
         return self.username
