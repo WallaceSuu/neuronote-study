@@ -29,3 +29,4 @@ class uploadPDFView(APIView):
         return Response({"message": "File uploaded successfully"}, status=status.HTTP_200_OK)
     
     
+    
