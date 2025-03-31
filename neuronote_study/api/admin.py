@@ -3,7 +3,7 @@ from .models import *
 
 @admin.register(uploadPDF)
 class UploadPDFAdmin(admin.ModelAdmin):
-    list_display = ('pdf_file', 'pdf_key', 'created_at')
+    list_display = ('pdf_file', 'pdf_key', 'user', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('pdf_file',)
     readonly_fields = ('created_at',)
@@ -21,7 +21,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('note_text', 'created_at')
+    list_display = ('note_text', 'user', 'note_key', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('note_text',)
     readonly_fields = ('created_at',)

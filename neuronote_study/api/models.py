@@ -18,6 +18,7 @@ class User(models.Model):
 
 class uploadPDF(models.Model):
     pdf_file = models.FileField(upload_to='pdf_files/')
+    pdf_name = models.CharField(max_length=255, null=True, blank=True)
     pdf_key = models.CharField(max_length=36, default=generateRandomKey, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'frontend',
+    'openAI_api',
 ]
 
 MIDDLEWARE = [

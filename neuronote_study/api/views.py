@@ -21,12 +21,22 @@ class uploadPDFView(APIView):
             for chunk in pdf_file.chunks():
                 destination.write(chunk)
 
-
         # Adding the uploaded file to the django database
-        new_upload = uploadPDF(pdf_file=pdf_file)
+        new_upload = uploadPDF(pdf_file=pdf_file, pdf_name=pdf_file.name)
         new_upload.save()
         
         return Response({"message": "File uploaded successfully"}, status=status.HTTP_200_OK)
-    
+
+# Want to get all the pdf files uploaded by a user, use filter instead of get    
+# class getPDFView(APIView):
+#     def get(self, request, user_key):
+#         pdf = uploadPDF.objects.filter(user=user_key)
+
+#         if pdf.exists():
+#             return Response({"error": "PDF not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+#         pdf_list = [{"pdf_file": pdf.pdf_file, "title": pdf.pdf_name, "key": pdf.pdf_key} for pdf in pdf]
+
+#         return Response({"pdf": pdf_list}, status=status.HTTP_200_OK)
     
     
