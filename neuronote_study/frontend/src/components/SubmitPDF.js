@@ -11,6 +11,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import axios from "axios";
+import { API_ENDPOINTS, axiosConfig } from "../config";
 
 const SubmitPDF = () => {
   const theme = useTheme();
@@ -85,13 +86,14 @@ const SubmitPDF = () => {
 
     // Sending the formdata object to the server via axios post request
     try {
-      const response = await axios.post("/upload-pdf/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        API_ENDPOINTS.UPLOAD_PDF,
+        formData,
+        axiosConfig
+      );
       console.log(response.data);
       alert("PDF uploaded successfully");
+      setFiles([]); // Clear the files after successful upload
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to upload PDF");
