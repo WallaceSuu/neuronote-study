@@ -11,9 +11,9 @@ const Notes = () => {
       maxWidth="xl"
       sx={{
         py: 4,
-        height: "calc(100vh - 64px)", // Subtract the height of the Navigation bar
         display: "flex",
         flexDirection: "column",
+        minHeight: "100%",
       }}
     >
       <Typography

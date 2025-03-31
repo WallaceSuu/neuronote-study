@@ -11,3 +11,10 @@ def notes(request):
 
 def about(request):
     return render(request, 'frontend/index.html')
+
+def login(request):
+    return render(request, 'frontend/index.html')
+
+def register(request):
+    return render(request, 'frontend/index.html')
+

@@ -9,12 +9,13 @@ const LandingPage = () => {
     <Box
       sx={{
         bgcolor: "#000",
-        minHeight: "calc(100vh - 64px)", // Account for the height of the navigation bar
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         color: "white",
+        minHeight: "100%",
+        py: 4,
       }}
     >
       <Container maxWidth="md">
