@@ -93,6 +93,7 @@ const SubmitPDF = () => {
       );
       console.log(response.data);
       alert("PDF uploaded successfully");
+      window.location.href = "/notes";
       setFiles([]); // Clear the files after successful upload
     } catch (error) {
       console.error("Error:", error);
