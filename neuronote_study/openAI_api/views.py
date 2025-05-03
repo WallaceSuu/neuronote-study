@@ -2,7 +2,154 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from api.models import *
+from .util import *
 import openai
 
 # Create your views here.
+
+class GetUserPDFsView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            # Get PDFs that don't have any associated notes
+            extracted_pdfs = uploadPDF.objects.filter(
+                user=request.user
+            ).exclude(
+                pdf_key__in=note.objects.values_list('note_key__pdf_key', flat=True)
+            ).order_by('-created_at')
+            
+            pdf_data = [{
+                'pdf_id': pdf.pdf_key,
+                'pdf_name': pdf.pdf_name,
+                'created_at': pdf.created_at,
+                'file_url': request.build_absolute_uri(pdf.pdf_file.url) if pdf.pdf_file else None
+            } for pdf in extracted_pdfs]
+            
+            return Response({
+                'status': 'success',
+                'pdfs': pdf_data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class createNoteView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            pdf_key = request.data.get('pdf_key')
+            if not pdf_key:
+                return Response({
+                    'status': 'error',
+                    'message': 'PDF key is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Get the PDF object
+            pdf = uploadPDF.objects.get(pdf_key=pdf_key, user=request.user)
+            
+            # Generate summary using OpenAI
+            try:
+                note_text = generate_summary(pdf)
+            except Exception as e:
+                return Response({
+                    'status': 'error',
+                    'message': f'Failed to generate summary: {str(e)}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # Create the note
+            new_note = note.objects.create(
+                note_text=note_text,
+                user=request.user,
+                note_key=pdf
+            )
+            
+            return Response({
+                'status': 'success',
+                'message': 'Note created successfully',
+                'note_id': new_note.id,
+                'note_text': note_text
+            }, status=status.HTTP_201_CREATED)
+            
+        except uploadPDF.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'PDF not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProcessPDFsView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            # Get unprocessed PDFs
+            pdfs_response = GetUserPDFsView().get(request)
+            if pdfs_response.status_code != status.HTTP_200_OK:
+                return pdfs_response
+                
+            pdfs_data = pdfs_response.data['pdfs']
+            
+            # Process each PDF and create notes
+            results = []
+            for pdf in pdfs_data:
+                # Create note for each PDF
+                note_response = createNoteView().post(request._request, data={'pdf_key': pdf['pdf_id']})
+                results.append({
+                    'pdf_id': pdf['pdf_id'],
+                    'pdf_name': pdf['pdf_name'],
+                    'status': 'success' if note_response.status_code == status.HTTP_201_CREATED else 'failed',
+                    'message': note_response.data.get('message', '')
+                })
+            
+            return Response({
+                'status': 'success',
+                'results': results
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetNotesView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            # Get all notes for the current user
+            user_notes = note.objects.filter(user=request.user).order_by('-created_at')
+            
+            notes_data = [{
+                'note_id': note_obj.id,
+                'pdf_id': note_obj.note_key.pdf_key,
+                'pdf_name': note_obj.note_key.pdf_name,
+                'note_text': note_obj.note_text,
+                'created_at': note_obj.created_at
+            } for note_obj in user_notes]
+            
+            return Response({
+                'status': 'success',
+                'notes': notes_data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

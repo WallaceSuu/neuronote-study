@@ -6,8 +6,12 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 from .models import uploadPDF, User
+from rest_framework.permissions import IsAuthenticated
+from openAI_api.views import ProcessPDFsView
 
 class uploadPDFView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         pdf_file = request.FILES.get('pdf_file')
         if not pdf_file:
@@ -21,11 +25,24 @@ class uploadPDFView(APIView):
             for chunk in pdf_file.chunks():
                 destination.write(chunk)
 
-        # Adding the uploaded file to the django database
-        new_upload = uploadPDF(pdf_file=pdf_file, pdf_name=pdf_file.name)
+        # Adding the uploaded file to the django database with user association
+        new_upload = uploadPDF(pdf_file=pdf_file, pdf_name=pdf_file.name, user=request.user)
         new_upload.save()
         
-        return Response({"message": "File uploaded successfully"}, status=status.HTTP_200_OK)
+        # Process the PDF to generate notes
+        process_view = ProcessPDFsView()
+        process_response = process_view.post(request)
+        
+        if process_response.status_code != status.HTTP_200_OK:
+            return Response({
+                "message": "File uploaded successfully but note generation failed",
+                "error": process_response.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response({
+            "message": "File uploaded and processed successfully",
+            "note_generation": process_response.data
+        }, status=status.HTTP_200_OK)
 
 # Want to get all the pdf files uploaded by a user, use filter instead of get    
 # class getPDFView(APIView):

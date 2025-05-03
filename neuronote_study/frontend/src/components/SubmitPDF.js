@@ -81,16 +81,25 @@ const SubmitPDF = () => {
 
     // Appending each file submitted to the formdata object
     files.forEach((file) => {
+      console.log("Adding file to FormData:", file.name);
       formData.append("pdf_file", file);
     });
 
+    // Debug: Check what's in the FormData
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
     // Sending the formdata object to the server via axios post request
     try {
-      const response = await axios.post(
-        API_ENDPOINTS.UPLOAD_PDF,
-        formData,
-        axiosConfig
-      );
+      console.log("Sending request to:", API_ENDPOINTS.UPLOAD_PDF);
+      const response = await axios.post(API_ENDPOINTS.UPLOAD_PDF, formData, {
+        ...axiosConfig,
+        headers: {
+          ...axiosConfig.headers,
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log(response.data);
       alert("PDF uploaded successfully");
       window.location.href = "/notes";

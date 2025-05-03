@@ -10,41 +10,7 @@ import {
   Divider,
 } from "@mui/material";
 
-const NoteSidebar = ({ selectedNote, onNoteSelect }) => {
-  // Placeholder data - replace this with your actual data later
-  const notes = [
-    {
-      id: 1,
-      title: "Introduction to Machine Learning",
-      date: "2024-03-20",
-      text: "sample text 1",
-    },
-    {
-      id: 2,
-      title: "Neural Networks Basics",
-      date: "2024-03-19",
-      text: "sample text 2",
-    },
-    {
-      id: 3,
-      title: "Deep Learning Fundamentals",
-      date: "2024-03-18",
-      text: "sample text 3",
-    },
-    {
-      id: 4,
-      title: "Computer Vision Applications",
-      date: "2024-03-17",
-      text: "sample text 4",
-    },
-    {
-      id: 5,
-      title: "Natural Language Processing",
-      date: "2024-03-16",
-      text: "sample text 5",
-    },
-  ];
-
+const NoteSidebar = ({ notes, selectedNote, onNoteSelect }) => {
   return (
     <Paper
       sx={{
@@ -62,41 +28,54 @@ const NoteSidebar = ({ selectedNote, onNoteSelect }) => {
           Your Notes
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        <List sx={{ flex: 1, overflow: "auto" }}>
-          {notes.map((note) => (
-            <ListItem key={note.id} disablePadding>
-              <ListItemButton
-                onClick={() => onNoteSelect(note)}
-                selected={selectedNote?.id === note.id}
-                sx={{
-                  borderRadius: 1,
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  },
-                  "&.Mui-selected": {
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-              >
-                <ListItemText
-                  primary={
-                    <Typography sx={{ color: "white" }}>
-                      {note.title}
-                    </Typography>
-                  }
-                  secondary={
-                    <Typography
-                      sx={{ color: "rgba(255, 255, 255, 0.5)" }}
-                      variant="body2"
-                    >
-                      {note.date}
-                    </Typography>
-                  }
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+        {notes.length === 0 ? (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "rgba(255, 255, 255, 0.5)",
+              textAlign: "center",
+              mt: 2,
+            }}
+          >
+            No notes available, please upload a PDF to create a note!
+          </Typography>
+        ) : (
+          <List sx={{ flex: 1, overflow: "auto" }}>
+            {notes.map((note) => (
+              <ListItem key={note.id} disablePadding>
+                <ListItemButton
+                  onClick={() => onNoteSelect(note)}
+                  selected={selectedNote?.id === note.id}
+                  sx={{
+                    borderRadius: 1,
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    },
+                    "&.Mui-selected": {
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={
+                      <Typography sx={{ color: "white" }}>
+                        {note.title}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography
+                        sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                        variant="body2"
+                      >
+                        {new Date(note.created_at).toLocaleDateString()}
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        )}
       </Box>
     </Paper>
   );
