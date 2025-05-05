@@ -3,12 +3,13 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 
 // API Endpoints for more modularity
 export const API_ENDPOINTS = {
+  BASE_URL: API_BASE_URL,
   UPLOAD_PDF: `${API_BASE_URL}/api/upload-pdf/`,
   REGISTER: `${API_BASE_URL}/api/register/`,
-  NOTES: `${API_BASE_URL}/api/notes/`,
+  NOTES: `${API_BASE_URL}/openai/notes/`,
 };
 
-const getCSRFToken = () => {
+export const getCSRFToken = () => {
   const cookieName = "csrftoken";
   const cookieValue = document.cookie
     .split("; ")
@@ -17,12 +18,17 @@ const getCSRFToken = () => {
   return cookieValue;
 };
 
+const getAuthToken = () => {
+  return localStorage.getItem("authToken");
+};
+
 // Axios default config for regular API requests
 export const axiosConfig = {
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     "X-CSRFToken": getCSRFToken(),
+    "Authorization": `Token ${getAuthToken()}`,
   },
 };
 
@@ -32,5 +38,6 @@ export const axiosFileConfig = {
   headers: {
     "Content-Type": "multipart/form-data",
     "X-CSRFToken": getCSRFToken(),
+    "Authorization": `Token ${getAuthToken()}`,
   },
 };

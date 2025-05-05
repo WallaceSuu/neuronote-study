@@ -59,7 +59,7 @@ const NoteSidebar = ({ notes, selectedNote, onNoteSelect }) => {
                   <ListItemText
                     primary={
                       <Typography sx={{ color: "white" }}>
-                        {note.title}
+                        {note.pdf_name}
                       </Typography>
                     }
                     secondary={

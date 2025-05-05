@@ -1,6 +1,7 @@
 import openai
 from api.models import *
 import os
+import pdfplumber
 
 
 def getPDFInfo(user_key):
@@ -12,42 +13,37 @@ def getPDFInfo(user_key):
         pdf_info.append({"pdf_file": pdf.pdf_file, "pdf_name": pdf.pdf_name, "key": pdf.pdf_key})
     return pdf_info
 
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() + "\n\n"
+    return text
+
 def generate_summary(pdf):
     client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # Get the absolute path of the PDF file
     pdf_path = pdf.pdf_file.path
 
-    file = client.files.create(
-        file=open(pdf_path, "rb"),
-        purpose="assistants"
-    )
-
-    assistant = client.beta.assistants.create(
-        model="gpt-4o-mini",
-        instructions="You are a helpful assistant that summarizes PDF documents and provides a list of key points on the given document's main topic.",
-        tools=[{"type": "file_search"}],
-        file_ids=[file.id]
-    )
-
-    thread = client.beta.threads.create()
-
-    client.beta.threads.messages.create(
-        thread_id=thread.id,
-        role="user",
-        content="Please summarize this PDF document and provide key points."
-    )
+    # Extract text from PDF
+    pdf_text = extract_text_from_pdf(pdf_path)
     
-    run = client.beta.threads.runs.create_and_poll(
-        thread_id=thread.id,
-        assistant_id=assistant.id
+    if not pdf_text.strip():
+        raise Exception("Could not extract text from PDF")
+
+    # Create the completion
+    response = client.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that summarizes documents and provides a list of key points on the given document's main topic."},
+            {"role": "user", "content": f"Please summarize the following document and provide key points:\n\n{pdf_text}"}
+        ],
+        max_tokens=1000,
+        temperature=0.7
     )
 
-    if run.status == "completed":
-        messages = client.beta.threads.messages.list(thread_id=thread.id)
-        return messages.data[0].content[0].text.value
-    else:
-        raise Exception(f"Failed to generate summary, status: {run.status}")
+    return response.choices[0].message.content
     
     
 

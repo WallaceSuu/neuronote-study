@@ -8,12 +8,15 @@ import {
   Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_ENDPOINTS, getCSRFToken } from "../config";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,8 +28,33 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic here
-    console.log("Login attempt:", formData);
+    setError("");
+
+    try {
+      const response = await axios.post(
+        `${API_ENDPOINTS.BASE_URL}/api/login/`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+        }
+      );
+
+      if (response.data.token) {
+        // Clear any existing token
+        localStorage.removeItem("authToken");
+        // Store the new token in localStorage
+        localStorage.setItem("authToken", response.data.token);
+        // Redirect to notes page
+        navigate("/notes");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.error || "Login failed. Please try again.");
+    }
   };
 
   return (
@@ -63,6 +91,11 @@ const LoginPage = () => {
           >
             Welcome Back
           </Typography>
+          {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"
@@ -112,8 +145,7 @@ const LoginPage = () => {
                 background: "linear-gradient(45deg, #1a237e 30%, #3949ab 90%)",
                 color: "white",
                 "&:hover": {
-                  background:
-                    "linear-gradient(45deg, #0d47a1 30%, #1a237e 90%)",
+                  background: "linear-gradient(45deg, #0d47a1 30%, #1a237e 90%)",
                 },
                 borderRadius: "8px",
                 padding: "12px",

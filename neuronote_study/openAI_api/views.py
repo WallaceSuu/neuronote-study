@@ -58,6 +58,7 @@ class createNoteView(APIView):
             # Generate summary using OpenAI
             try:
                 note_text = generate_summary(pdf)
+                print(note_text)
             except Exception as e:
                 return Response({
                     'status': 'error',
@@ -95,21 +96,27 @@ class ProcessPDFsView(APIView):
     
     def post(self, request):
         try:
-            # Get unprocessed PDFs
-            pdfs_response = GetUserPDFsView().get(request)
-            if pdfs_response.status_code != status.HTTP_200_OK:
-                return pdfs_response
-                
-            pdfs_data = pdfs_response.data['pdfs']
+            # Get the PDFs that were just uploaded
+            pdfs = uploadPDF.objects.filter(
+                user=request.user
+            ).order_by('-created_at')[:1]  # Get only the most recently uploaded PDF
+            
+            if not pdfs.exists():
+                return Response({
+                    'status': 'error',
+                    'message': 'No PDFs found to process'
+                }, status=status.HTTP_404_NOT_FOUND)
             
             # Process each PDF and create notes
             results = []
-            for pdf in pdfs_data:
-                # Create note for each PDF
-                note_response = createNoteView().post(request._request, data={'pdf_key': pdf['pdf_id']})
+            for pdf in pdfs:
+                # Create note for the PDF
+                note_request = request._request
+                note_request.data = {'pdf_key': pdf.pdf_key}
+                note_response = createNoteView().post(note_request)
                 results.append({
-                    'pdf_id': pdf['pdf_id'],
-                    'pdf_name': pdf['pdf_name'],
+                    'pdf_id': pdf.pdf_key,
+                    'pdf_name': pdf.pdf_name,
                     'status': 'success' if note_response.status_code == status.HTTP_201_CREATED else 'failed',
                     'message': note_response.data.get('message', '')
                 })

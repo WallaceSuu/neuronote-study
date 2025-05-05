@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -12,12 +12,20 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import axios from "axios";
 import { API_ENDPOINTS, axiosConfig } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const SubmitPDF = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    setIsAuthenticated(!!token);
+  }, []);
 
   // Handle file drop
   const handleDrop = (e) => {
@@ -76,6 +84,12 @@ const SubmitPDF = () => {
       return;
     }
 
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      alert("Please log in to upload files.");
+      return;
+    }
+
     // Creating a new formdata object to send the files to the server
     const formData = new FormData();
 
@@ -98,6 +112,7 @@ const SubmitPDF = () => {
         headers: {
           ...axiosConfig.headers,
           "Content-Type": "multipart/form-data",
+          "Authorization": `Token ${token}`
         },
       });
       console.log(response.data);
@@ -106,9 +121,67 @@ const SubmitPDF = () => {
       setFiles([]); // Clear the files after successful upload
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to upload PDF");
+      if (error.response && error.response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        localStorage.removeItem("authToken");
+        navigate("/login");
+      } else {
+        alert("Failed to upload PDF");
+      }
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Paper
+          sx={{
+            p: 4,
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            backdropFilter: "blur(10px)",
+            borderRadius: 2,
+            border: "1px dashed rgba(33, 150, 243, 0.5)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "white" }}>
+            Please log in to upload PDFs
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              onClick={() => navigate("/login")}
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                "&:hover": {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/register")}
+              sx={{
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
+                "&:hover": {
+                  borderColor: theme.palette.primary.dark,
+                  backgroundColor: "rgba(33, 150, 243, 0.1)",
+                },
+              }}
+            >
+              Register
+            </Button>
+          </Stack>
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

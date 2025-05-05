@@ -35,14 +35,25 @@ class LoginUserView(APIView):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # Generate a token for the user
-            token, created = Token.objects.get_or_create(user=user)
+            # Delete any existing tokens for this user
+            Token.objects.filter(user=user).delete()
+            # Create a new token
+            token = Token.objects.create(user=user)
             return Response({"message": "User logged in successfully", "token": token.key}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LoginView(APIView):
     def post(self, request):
+        # Get the token from the request
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Token '):
+            token_key = auth_header.split(' ')[1]
+            try:
+                # Delete the token
+                Token.objects.get(key=token_key).delete()
+            except Token.DoesNotExist:
+                pass
         logout(request)
         return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
 

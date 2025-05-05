@@ -22,7 +22,7 @@ const Notes = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${API_ENDPOINTS.NOTES}`, axiosConfig);
-        setNotes(response.data);
+        setNotes(response.data.notes);
         setError(null);
       } catch (err) {
         console.error("Error fetching notes:", err);

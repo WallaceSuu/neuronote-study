@@ -6,8 +6,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 from .models import uploadPDF, User
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from openAI_api.views import ProcessPDFsView
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 class uploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -57,9 +58,14 @@ class uploadPDFView(APIView):
 #         return Response({"pdf": pdf_list}, status=status.HTTP_200_OK)
     
 class RegisterUserView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # Disable authentication for registration
+    
     def post(self, request):
         try:
             data = request.data
+            print(f"Received registration data: {data}")  # Debug log
+            
             username = data.get('username')
             email = data.get('email')
             password = data.get('password')
@@ -67,8 +73,10 @@ class RegisterUserView(APIView):
             last_name = data.get('last_name')
 
             if not all([username, email, password, first_name, last_name]):
+                missing_fields = [field for field in ['username', 'email', 'password', 'first_name', 'last_name'] 
+                                if not data.get(field)]
                 return Response(
-                    {"error": "All fields are required"},
+                    {"error": f"All fields are required. Missing fields: {', '.join(missing_fields)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -84,22 +92,31 @@ class RegisterUserView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                first_name=first_name,
-                last_name=last_name
-            )
-
-            return Response(
-                {"message": "User registered successfully"},
-                status=status.HTTP_201_CREATED
-            )
+            try:
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                user.save()
+                
+                return Response(
+                    {"message": "User registered successfully"},
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as create_error:
+                print(f"Error creating user: {str(create_error)}")  # Debug log
+                return Response(
+                    {"error": f"Error creating user: {str(create_error)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
         except Exception as e:
+            print(f"Registration failed: {str(e)}")  # Debug log
             return Response(
-                {"error": str(e)},
+                {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     

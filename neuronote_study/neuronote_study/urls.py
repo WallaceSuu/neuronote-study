@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from api.views import RegisterUserView
+from neuronote_study.views import LoginUserView
 
 urlpatterns = [
     path('', include('frontend.urls')),
@@ -27,4 +28,5 @@ urlpatterns = [
     path('openai/', include('openAI_api.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('register/', RegisterUserView.as_view(), name='register'),
+    path('api/login/', LoginUserView.as_view(), name='login'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
