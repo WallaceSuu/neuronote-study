@@ -20,7 +20,7 @@ def extract_text_from_pdf(pdf_path):
             text += page.extract_text() + "\n\n"
     return text
 
-def generate_summary(pdf):
+def generate_summary_and_title(pdf):
     client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     # Get the absolute path of the PDF file
@@ -33,7 +33,7 @@ def generate_summary(pdf):
         raise Exception("Could not extract text from PDF")
 
     # Create the completion
-    response = client.chat.completions.create(
+    text_response = client.chat.completions.create(
         model="gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that summarizes documents and provides a list of key points on the given document's main topic."},
@@ -43,7 +43,22 @@ def generate_summary(pdf):
         temperature=0.7
     )
 
-    return response.choices[0].message.content
+    title_response = client.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that generates titles for documents."},
+            {"role": "user", "content": f"Please generate a title for the following document:\n\n{pdf_text}"}
+        ],
+        max_tokens=30,
+        temperature=1.2
+    )
+
+    return {
+        "text": text_response.choices[0].message.content,
+        "title": title_response.choices[0].message.content
+        }
+
+    
     
     
 

@@ -9,6 +9,9 @@ def submit(request):
 def notes(request):
     return render(request, 'frontend/index.html')
 
+def flashcards(request):
+    return render(request, 'frontend/index.html')
+
 def about(request):
     return render(request, 'frontend/index.html')
 

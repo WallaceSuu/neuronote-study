@@ -10,6 +10,10 @@ class UploadPDFAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     list_per_page = 25
 
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'user_id', 'email')
@@ -19,6 +23,10 @@ class UserAdmin(admin.ModelAdmin):
     ordering = ('-user_id',)
     list_per_page = 25
 
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()
+
 @admin.register(note)
 class NoteAdmin(admin.ModelAdmin):
     list_display = ('note_text', 'user', 'note_key', 'created_at')
@@ -27,3 +35,7 @@ class NoteAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
     list_per_page = 25
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.delete()

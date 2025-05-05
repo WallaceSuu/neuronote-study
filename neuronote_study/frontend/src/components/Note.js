@@ -13,6 +13,23 @@ const Note = ({ selectedNote }) => {
     setIsAuthenticated(!!token);
   }, []);
 
+  const formatBoldText = (text) => {
+    if (!text) return "";
+    // Remove surrounding quotes if they exist
+    const cleanText = text.trim().replace(/^["']|["']$/g, '');
+    const parts = cleanText.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <span key={index} style={{ fontWeight: 'bold', color: 'white' }}>
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   const formatNoteText = (text) => {
     if (!text) return "";
     
@@ -164,7 +181,7 @@ const Note = ({ selectedNote }) => {
       {selectedNote ? (
         <>
           <Typography variant="h5" sx={{ mb: 3, color: "white" }}>
-            {selectedNote.pdf_name}
+            {formatBoldText(selectedNote.note_title)}
           </Typography>
           <Box sx={{ flex: 1, overflow: "auto" }}>
             {formatNoteText(selectedNote.note_text)}

@@ -11,6 +11,22 @@ import {
 } from "@mui/material";
 
 const NoteSidebar = ({ notes, selectedNote, onNoteSelect }) => {
+  const formatBoldText = (text) => {
+    if (!text) return "";
+    const cleanText = text.trim().replace(/^["']|["']$/g, '');
+    const parts = cleanText.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <span key={index} style={{ fontWeight: 'bold', color: 'white' }}>
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <Paper
       sx={{
@@ -59,7 +75,7 @@ const NoteSidebar = ({ notes, selectedNote, onNoteSelect }) => {
                   <ListItemText
                     primary={
                       <Typography sx={{ color: "white" }}>
-                        {note.pdf_name}
+                        {formatBoldText(note.note_title)}
                       </Typography>
                     }
                     secondary={

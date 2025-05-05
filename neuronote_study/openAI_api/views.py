@@ -57,16 +57,17 @@ class createNoteView(APIView):
             
             # Generate summary using OpenAI
             try:
-                note_text = generate_summary(pdf)
-                print(note_text)
+                note_text = generate_summary_and_title(pdf)["text"]
+                note_title = generate_summary_and_title(pdf)["title"]
             except Exception as e:
                 return Response({
                     'status': 'error',
-                    'message': f'Failed to generate summary: {str(e)}'
+                    'message': f'Failed to generate summary or title: {str(e)}'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             # Create the note
             new_note = note.objects.create(
+                note_title=note_title,
                 note_text=note_text,
                 user=request.user,
                 note_key=pdf
@@ -76,7 +77,8 @@ class createNoteView(APIView):
                 'status': 'success',
                 'message': 'Note created successfully',
                 'note_id': new_note.id,
-                'note_text': note_text
+                'note_text': note_text,
+                'note_title': note_title
             }, status=status.HTTP_201_CREATED)
             
         except uploadPDF.DoesNotExist:
@@ -142,6 +144,7 @@ class GetNotesView(APIView):
             user_notes = note.objects.filter(user=request.user).order_by('-created_at')
             
             notes_data = [{
+                'note_title': note_obj.note_title,
                 'note_id': note_obj.id,
                 'pdf_id': note_obj.note_key.pdf_key,
                 'pdf_name': note_obj.note_key.pdf_name,
