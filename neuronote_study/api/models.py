@@ -70,3 +70,15 @@ class note(models.Model):
         if user and not user.user_notes.exists():
             user.delete()
 
+class flashcard(models.Model):
+    flashcard_title = models.CharField(max_length=255, null=True, blank=True)
+    flashcard_question = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_flashcards')
+    note = models.ForeignKey(note, on_delete=models.CASCADE, related_name='note_flashcards', db_constraint=False)
+
+class flashcard_answer(models.Model):
+    flashcard_answer = models.ForeignKey(flashcard, on_delete=models.CASCADE, related_name='flashcard_answers')
+    answer_text = models.TextField()
+    is_correct = models.BooleanField(default=False)
+    

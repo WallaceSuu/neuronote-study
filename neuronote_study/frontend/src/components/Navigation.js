@@ -185,7 +185,7 @@ const Navigation = () => {
             </NavButton>
             <NavButton
               component={RouterLink}
-              to="/notes"
+              to="/flashcards"
               color="inherit"
               active={location.pathname === "/flashcards"}
             >

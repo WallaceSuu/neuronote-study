@@ -163,3 +163,101 @@ class GetNotesView(APIView):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class generateFlashcardsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            note_id = request.data.get('note_id')
+            
+            if not note_id:
+                return Response({
+                    'status': 'error',
+                    'message': 'Note ID is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            note_obj = note.objects.get(id=note_id)
+            note_text = note_obj.note_text
+
+            flashcard_data = generate_flashcards(note_text)
+            flashcard_question = flashcard_data.get("flashcard_question")
+            flashcard_answers = flashcard_data.get("flashcard_answers")
+
+            new_flashcard = flashcard.objects.create(
+                flashcard_title=note_obj.note_title,
+                flashcard_question=flashcard_question,
+                user=request.user,
+                note=note_obj
+            )
+
+            #currently store the answers as a unformatted single string, need to split them into a list of strings to store in the database later
+
+            new_flashcard_answers = flashcard_answer.objects.create(
+                flashcard_answer=new_flashcard,
+                answer_text=flashcard_answers,
+                is_correct=True
+            )
+
+            new_flashcard_answers.save()
+            new_flashcard.save()
+
+            return Response({
+                'status': 'success',
+                'flashcard': {
+                    'id': new_flashcard.id,
+                    'title': new_flashcard.flashcard_title,
+                    'question': new_flashcard.flashcard_question,
+                    'answers': flashcard_answers
+                }
+            }, status=status.HTTP_200_OK)
+
+        except note.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Note not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class getFlashcardsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, note_id=None):
+        try:
+            # Get flashcards for the current user
+            user_flashcards = flashcard.objects.filter(user=request.user)
+            
+            # If note_id is provided, filter flashcards by note
+            if note_id:
+                user_flashcards = user_flashcards.filter(note_id=note_id)
+            
+            user_flashcards = user_flashcards.order_by('-created_at')
+            
+            flashcards_data = []
+            for flashcard_obj in user_flashcards:
+                # Get the first answer for this flashcard
+                answer = flashcard_obj.flashcard_answers.first()
+                flashcards_data.append({
+                    'id': flashcard_obj.id,
+                    'title': flashcard_obj.flashcard_title, 
+                    'question': flashcard_obj.flashcard_question,
+                    'answer': answer.answer_text if answer else None,
+                    'created_at': flashcard_obj.created_at
+                })
+
+            return Response({
+                'status': 'success',
+                'flashcards': flashcards_data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

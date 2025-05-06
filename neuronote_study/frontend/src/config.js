@@ -7,6 +7,9 @@ export const API_ENDPOINTS = {
   UPLOAD_PDF: `${API_BASE_URL}/api/upload-pdf/`,
   REGISTER: `${API_BASE_URL}/api/register/`,
   NOTES: `${API_BASE_URL}/openai/notes/`,
+  FLASHCARDS: `${API_BASE_URL}/openai/flashcards/`,
+  GENERATE_FLASHCARDS: `${API_BASE_URL}/openai/generate-flashcards/`,
+  GET_FLASHCARDS: `${API_BASE_URL}/openai/get-flashcards/`,
 };
 
 export const getCSRFToken = () => {

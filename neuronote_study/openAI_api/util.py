@@ -58,7 +58,34 @@ def generate_summary_and_title(pdf):
         "title": title_response.choices[0].message.content
         }
 
+def generate_flashcards(note_text):
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    flashcard_question = client.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that generates questions for a given text of summary notes."},
+            {"role": "user", "content": f"Please generate a purposeful question for studying the following text, only use what is provided in the text with small variations:\n\n{note_text}"}
+        ],
+        max_tokens=100,
+        temperature=0.7
+    )
     
+    flashcard_answers = client.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that generates answers for a given text of summary notes."},
+            {"role": "user", "content": f"Please generate four wrong answers and one correct answer for the following question; make the false answers plausible:\n\n{flashcard_question} using the following text:\n\n{note_text}, separate the answers with the character '|' also highlight the correct answer with the characters '**'"}
+        ],
+        max_tokens=100,
+        temperature=1.2
+    )
+
+    return {
+        "flashcard_question": flashcard_question.choices[0].message.content,
+        "flashcard_answers": flashcard_answers.choices[0].message.content
+    }
+
     
     
 

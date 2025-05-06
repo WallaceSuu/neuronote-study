@@ -39,3 +39,16 @@ class NoteAdmin(admin.ModelAdmin):
     def delete_queryset(self, request, queryset):
         for obj in queryset:
             obj.delete()
+
+@admin.register(flashcard)
+class FlashcardAdmin(admin.ModelAdmin):
+    list_display = ('flashcard_title', 'flashcard_question', 'user', 'note', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('flashcard_title', 'flashcard_question')
+    
+@admin.register(flashcard_answer)
+class FlashcardAnswerAdmin(admin.ModelAdmin):
+    list_display = ('flashcard_answer', 'answer_text', 'is_correct')
+    list_filter = ('is_correct',)
+    search_fields = ('flashcard_answer', 'answer_text')
+    
