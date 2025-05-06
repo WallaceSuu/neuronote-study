@@ -7,6 +7,7 @@ import {
   Container,
   Stack,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
@@ -21,6 +22,7 @@ const SubmitPDF = () => {
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -79,14 +81,17 @@ const SubmitPDF = () => {
 
   // Handle file submission
   const handleSubmit = async () => {
+    setIsLoading(true);
     if (files.length === 0) {
       alert("Please upload at least one PDF file.");
+      setIsLoading(false);
       return;
     }
 
     const token = localStorage.getItem("authToken");
     if (!token) {
       alert("Please log in to upload files.");
+      setIsLoading(false);
       return;
     }
 
@@ -119,6 +124,7 @@ const SubmitPDF = () => {
       alert("PDF uploaded successfully");
       window.location.href = "/notes";
       setFiles([]); // Clear the files after successful upload
+      setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);
       if (error.response && error.response.status === 401) {
@@ -128,6 +134,7 @@ const SubmitPDF = () => {
       } else {
         alert("Failed to upload PDF");
       }
+      setIsLoading(false);
     }
   };
 
@@ -334,6 +341,7 @@ const SubmitPDF = () => {
                 <Button
                   variant="contained"
                   onClick={handleSubmit}
+                  disabled={isLoading}
                   sx={{
                     mt: 2,
                     backgroundColor: theme.palette.secondary.main,
@@ -344,9 +352,28 @@ const SubmitPDF = () => {
                     },
                     transition: "all 0.2s",
                     boxShadow: "0 3px 8px rgba(0, 188, 212, 0.2)",
+                    minWidth: "150px",
+                    position: "relative",
                   }}
                 >
-                  Process Files
+                  {isLoading ? (
+                    <>
+                      <CircularProgress
+                        size={24}
+                        sx={{
+                          color: "white",
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          marginTop: "-12px",
+                          marginLeft: "-12px",
+                        }}
+                      />
+                      <span style={{ visibility: "hidden" }}>Process Files</span>
+                    </>
+                  ) : (
+                    "Process Files"
+                  )}
                 </Button>
               </Box>
             )}
