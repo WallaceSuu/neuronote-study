@@ -176,6 +176,9 @@ const Note = ({ selectedNote }) => {
         borderRadius: 2,
         border: "1px solid rgba(255, 255, 255, 0.05)",
         p: 3,
+        maxWidth: "100%",
+        mx: "auto",
+        overflow: "hidden",
       }}
     >
       {selectedNote ? (
