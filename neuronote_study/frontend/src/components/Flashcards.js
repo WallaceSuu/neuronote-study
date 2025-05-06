@@ -23,6 +23,7 @@ const Flashcards = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [flashcards, setFlashcards] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -67,8 +68,29 @@ const Flashcards = () => {
     fetchFlashcards();
   }, [selectedNote]);
 
-  const handleNextCard = () => {
+  const handleNextCard = async () => {
     setShowAnswer(false);
+    
+    // If we're at the last card, generate a new one
+    if (currentCardIndex === flashcards.length - 1) {
+      setIsGenerating(true);
+      try {
+        const response = await axios.post(
+          `${API_ENDPOINTS.GENERATE_FLASHCARDS}`,
+          { note_id: selectedNote.note_id },
+          axiosConfig
+        );
+        if (response.data.flashcard) {
+          setFlashcards(prev => [...prev, response.data.flashcard]);
+        }
+      } catch (err) {
+        console.error("Error generating new flashcard:", err);
+        setError("Failed to generate new flashcard. Please try again.");
+      } finally {
+        setIsGenerating(false);
+      }
+    }
+    
     setCurrentCardIndex((prev) => (prev + 1) % flashcards.length);
   };
 
@@ -77,6 +99,26 @@ const Flashcards = () => {
     setCurrentCardIndex((prev) => 
       prev === 0 ? flashcards.length - 1 : prev - 1
     );
+  };
+
+  const handleGenerateFlashcards = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await axios.post(
+        `${API_ENDPOINTS.GENERATE_FLASHCARDS}`,
+        { note_id: selectedNote.note_id },
+        axiosConfig
+      );
+      if (response.data.flashcard) {
+        setFlashcards([response.data.flashcard]);
+        setCurrentCardIndex(0);
+      }
+    } catch (err) {
+      console.error("Error generating flashcards:", err);
+      setError("Failed to generate flashcards. Please try again later.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const renderFlashcard = () => {
@@ -88,7 +130,7 @@ const Flashcards = () => {
       );
     }
 
-    if (loading) {
+    if (loading || isGenerating) {
       return (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress />
@@ -112,19 +154,8 @@ const Flashcards = () => {
           </Typography>
           <Button 
             variant="contained" 
-            onClick={async () => {
-              try {
-                const response = await axios.post(
-                  `${API_ENDPOINTS.GENERATE_FLASHCARDS}`,
-                  { note_id: selectedNote.note_id },
-                  axiosConfig
-                );
-                setFlashcards(response.data.flashcard ? [response.data.flashcard] : []);
-              } catch (err) {
-                console.error("Error generating flashcards:", err);
-                setError("Failed to generate flashcards. Please try again later.");
-              }
-            }}
+            onClick={handleGenerateFlashcards}
+            disabled={isGenerating}
             sx={{ 
               backgroundColor: "rgba(33, 150, 243, 0.8)",
               "&:hover": {
@@ -132,7 +163,7 @@ const Flashcards = () => {
               }
             }}
           >
-            Generate flashcards from these notes
+            {isGenerating ? "Generating..." : "Generate flashcards from these notes"}
           </Button>
         </Box>
       );
@@ -160,6 +191,7 @@ const Flashcards = () => {
           <Button 
             onClick={handlePreviousCard}
             variant="outlined"
+            disabled={isGenerating}
             sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
           >
             Previous
@@ -167,6 +199,7 @@ const Flashcards = () => {
           <Button 
             onClick={() => setShowAnswer(!showAnswer)}
             variant="contained"
+            disabled={isGenerating}
             sx={{ 
               backgroundColor: "rgba(33, 150, 243, 0.8)",
               "&:hover": {
@@ -176,12 +209,16 @@ const Flashcards = () => {
           >
             {showAnswer ? "Show Question" : "Show Answer"}
           </Button>
+          <Box>
+            {currentCardIndex+1}/{flashcards.length}
+          </Box>
           <Button 
             onClick={handleNextCard}
             variant="outlined"
+            disabled={isGenerating}
             sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
           >
-            Next
+            {isGenerating ? "Generating..." : "Next"}
           </Button>
         </CardActions>
       </Card>
