@@ -191,15 +191,28 @@ class generateFlashcardsView(APIView):
                 note=note_obj
             )
 
-            #currently store the answers as a unformatted single string, need to split them into a list of strings to store in the database later
+            # Split answers by '|' and handle the correct answer formatting
+            answers = [answer.strip() for answer in flashcard_answers.split("|") if answer.strip()]
+            formatted_answers = []
+            
+            for answer in answers:
+                is_correct = False
+                if "**" in answer:
+                    # Remove the ** markers and mark a  s cor rect
+                    answer = answer[2:-2].strip()
+                    is_correct = True
+                
+                new_flashcard_answer = flashcard_answer.objects.create(
+                    flashcard_answer=new_flashcard,
+                    answer_text=answer,
+                    is_correct=is_correct
+                )
+                new_flashcard_answer.save()
+                formatted_answers.append({
+                    'text': answer,
+                    'is_correct': is_correct
+                })
 
-            new_flashcard_answers = flashcard_answer.objects.create(
-                flashcard_answer=new_flashcard,
-                answer_text=flashcard_answers,
-                is_correct=True
-            )
-
-            new_flashcard_answers.save()
             new_flashcard.save()
 
             return Response({
@@ -208,7 +221,7 @@ class generateFlashcardsView(APIView):
                     'id': new_flashcard.id,
                     'title': new_flashcard.flashcard_title,
                     'question': new_flashcard.flashcard_question,
-                    'answers': flashcard_answers
+                    'answers': formatted_answers
                 }
             }, status=status.HTTP_200_OK)
 
@@ -241,13 +254,18 @@ class getFlashcardsView(APIView):
             
             flashcards_data = []
             for flashcard_obj in user_flashcards:
-                # Get the first answer for this flashcard
-                answer = flashcard_obj.flashcard_answers.first()
+                # Get all answers for this flashcard
+                answers = flashcard_obj.flashcard_answers.all()
+                formatted_answers = [{
+                    'text': answer.answer_text,
+                    'is_correct': answer.is_correct
+                } for answer in answers]
+                
                 flashcards_data.append({
                     'id': flashcard_obj.id,
                     'title': flashcard_obj.flashcard_title, 
                     'question': flashcard_obj.flashcard_question,
-                    'answer': answer.answer_text if answer else None,
+                    'answers': formatted_answers,
                     'created_at': flashcard_obj.created_at
                 })
 

@@ -75,7 +75,7 @@ def generate_flashcards(note_text):
         model="gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that generates answers for a given text of summary notes."},
-            {"role": "user", "content": f"Please generate four wrong answers and one correct answer for the following question; make the false answers plausible:\n\n{flashcard_question} using the following text:\n\n{note_text}, separate the answers with the character '|' also highlight the correct answer with the characters '**'"}
+            {"role": "user", "content": f"Please generate four wrong answers and one correct answer for the following question; make the false answers plausible:\n\n{flashcard_question} using the following text:\n\n{note_text}, separate the answers with the character '|' also highlight the correct answer with the characters '**'. Make sure that you only generate one correct answer."}
         ],
         max_tokens=100,
         temperature=1.2

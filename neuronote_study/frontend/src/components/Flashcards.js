@@ -22,6 +22,7 @@ const Flashcards = () => {
   const [flashcards, setFlashcards] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -119,6 +120,11 @@ const Flashcards = () => {
     }
   };
 
+  const handleAnswerClick = (answer) => {
+    setSelectedAnswer(answer);
+    setShowAnswer(true);
+  };
+
   const renderFlashcard = () => {
     if (!selectedNote) {
       return (
@@ -180,10 +186,36 @@ const Flashcards = () => {
           border: "1px solid rgba(255, 255, 255, 0.05)",
         }}
       >
-        <CardContent sx={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Typography variant="h5" sx={{ textAlign: "center", color: "white" }}>
-            {showAnswer ? currentCard.answer : currentCard.question}
+        <CardContent>
+          <Typography variant="h5" sx={{ textAlign: "center", color: "white", mb: 3 }}>
+            {currentCard.question}
           </Typography>
+          <Box sx={{ mt: 2 }}>
+            {currentCard.answers && currentCard.answers.map((answer, index) => (
+              <Button
+                key={index}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 1,
+                  backgroundColor: selectedAnswer === answer 
+                    ? (answer.is_correct ? '#4caf50' : '#f44336')
+                    : 'transparent',
+                  color: selectedAnswer === answer ? 'white' : 'inherit',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  '&:hover': {
+                    backgroundColor: selectedAnswer === answer 
+                      ? (answer.is_correct ? '#388e3c' : '#d32f2f')
+                      : 'rgba(255, 255, 255, 0.04)',
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                  },
+                }}
+                onClick={() => handleAnswerClick(answer)}
+              >
+                {answer.text}
+              </Button>
+            ))}
+          </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: "space-between", p: 2 }}>
           <Button 
@@ -193,19 +225,6 @@ const Flashcards = () => {
             sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
           >
             Previous
-          </Button>
-          <Button 
-            onClick={() => setShowAnswer(!showAnswer)}
-            variant="contained"
-            disabled={isGenerating}
-            sx={{ 
-              backgroundColor: "rgba(33, 150, 243, 0.8)",
-              "&:hover": {
-                backgroundColor: "rgba(33, 150, 243, 0.9)",
-              }
-            }}
-          >
-            {showAnswer ? "Show Question" : "Show Answer"}
           </Button>
           <Box>
             {currentCardIndex+1}/{flashcards.length}
