@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Grid,
+  Box,
   Typography,
   CircularProgress,
-  Box,
-  Paper,
   Card,
   CardContent,
   CardActions,
@@ -24,6 +21,7 @@ const Flashcards = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [flashcards, setFlashcards] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -226,61 +224,44 @@ const Flashcards = () => {
   };
 
   return (
-    <Container
-      maxWidth="xl"
-      sx={{
-        py: 4,
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100%",
-      }}
-    >
-      <Typography
-        variant="h4"
-        fontWeight="bold"
+    <Box sx={{ display: "flex", height: "calc(100vh - 64px)", mt: "64px" }}>
+      <FlashcardSidebar
+        notes={notes}
+        selectedNote={selectedNote}
+        onNoteSelect={setSelectedNote}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+      
+      <Box
         sx={{
-          mb: 3,
-          background: "linear-gradient(90deg, #00bcd4, #2196f3)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          textShadow: "0 0 20px rgba(33, 150, 243, 0.3)",
+          flexGrow: 1,
+          ml: isSidebarOpen ? '320px' : 0,
+          transition: 'margin-left 0.2s ease-in-out',
+          p: 3,
+          height: '100%',
+          overflow: 'auto',
         }}
       >
-        Flashcards
-      </Typography>
-
-      {loading && !selectedNote ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : error && !selectedNote ? (
-        <Typography color="error" sx={{ textAlign: "center", mt: 4 }}>
-          {error}
-        </Typography>
-      ) : notes.length === 0 ? (
-        <Typography
-          sx={{ textAlign: "center", mt: 4, color: "rgba(255, 255, 255, 0.7)" }}
-        >
-          No notes found. Upload a PDF to create your first set of flashcards!
-        </Typography>
-      ) : (
-        <Grid container spacing={3} sx={{ flex: 1 }}>
-          {/* Sidebar */}
-          <Grid item xs={12} md={3} sx={{ height: "100%" }}>
-            <FlashcardSidebar
-              notes={notes}
-              selectedNote={selectedNote}
-              onNoteSelect={setSelectedNote}
-            />
-          </Grid>
-
-          {/* Main Content */}
-          <Grid item xs={12} md={9} sx={{ height: "100%" }}>
-            {renderFlashcard()}
-          </Grid>
-        </Grid>
-      )}
-    </Container>
+        {loading && !selectedNote ? (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : error && !selectedNote ? (
+          <Typography color="error" sx={{ textAlign: "center", mt: 4 }}>
+            {error}
+          </Typography>
+        ) : notes.length === 0 ? (
+          <Typography
+            sx={{ textAlign: "center", mt: 4, color: "rgba(255, 255, 255, 0.7)" }}
+          >
+            No notes found. Upload a PDF to create your first set of flashcards!
+          </Typography>
+        ) : (
+          renderFlashcard()
+        )}
+      </Box>
+    </Box>
   );
 };
 
