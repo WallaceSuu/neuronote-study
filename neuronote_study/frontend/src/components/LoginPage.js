@@ -50,6 +50,7 @@ const LoginPage = () => {
         localStorage.setItem("authToken", response.data.token);
         // Redirect to notes page
         navigate("/notes");
+        window.location.reload();
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import uploadPDFView, RegisterUserView, LogoutView
+from .views import *
 from openAI_api.views import GetNotesView
 
 urlpatterns = [
@@ -7,4 +7,5 @@ urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
     path('notes/', GetNotesView.as_view(), name='notes'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('user/', getUserView.as_view(), name='user'),
 ]

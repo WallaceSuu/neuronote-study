@@ -44,18 +44,6 @@ class uploadPDFView(APIView):
             "message": "File uploaded and processed successfully",
             "note_generation": process_response.data
         }, status=status.HTTP_200_OK)
-
-# Want to get all the pdf files uploaded by a user, use filter instead of get    
-# class getPDFView(APIView):
-#     def get(self, request, user_key):
-#         pdf = uploadPDF.objects.filter(user=user_key)
-
-#         if pdf.exists():
-#             return Response({"error": "PDF not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-#         pdf_list = [{"pdf_file": pdf.pdf_file, "title": pdf.pdf_name, "key": pdf.pdf_key} for pdf in pdf]
-
-#         return Response({"pdf": pdf_list}, status=status.HTTP_200_OK)
     
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -127,6 +115,14 @@ class LogoutView(APIView):
         logout(request)
         request.user.auth_token.delete()
         return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+
+class getUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({"username": user.username}, status=status.HTTP_200_OK)
         
+
     
     

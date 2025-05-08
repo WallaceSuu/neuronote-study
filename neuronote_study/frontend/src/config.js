@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   GENERATE_FLASHCARDS: `${API_BASE_URL}/openai/generate-flashcards/`,
   GET_FLASHCARDS: `${API_BASE_URL}/openai/get-flashcards/`,
   LOGOUT: `${API_BASE_URL}/api/logout/`,
+  USER: `${API_BASE_URL}/api/user/`,
 };
 
 export const getCSRFToken = () => {

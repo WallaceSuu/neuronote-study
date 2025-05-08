@@ -116,8 +116,38 @@ const GlowIconButton = styled(IconButton)(({ theme }) => ({
 
 const Navigation = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [username, setUsername] = useState('');
   const open = Boolean(anchorEl);
   const location = useLocation();
+
+  useEffect(() => {
+    // Fetch user information when component mounts
+    const fetchUserInfo = async () => {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        setUsername('');
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API_ENDPOINTS.BASE_URL}/api/user/`, {
+          headers: {
+            'Authorization': `Token ${authToken}`
+          }
+        });
+        setUsername(response.data.username);
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+        if (error.response?.status === 401) {
+          // If unauthorized, clear the auth token and username
+          localStorage.removeItem('authToken');
+          setUsername('');
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -128,15 +158,29 @@ const Navigation = () => {
   };
 
   const handleLogout = () => {
-    axios.post(`${API_ENDPOINTS.LOGOUT}`)
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      axios.post(`${API_ENDPOINTS.LOGOUT}`, {}, {
+        headers: {
+          'Authorization': `Token ${authToken}`
+        }
+      })
       .then(() => {
-        navigate('/login');
+        localStorage.removeItem('authToken');
+        setUsername('');
+        window.location.href = '/login';
       })
       .catch((error) => {
         console.error('Logout failed:', error);
+        // Even if the API call fails, clear local state
+        localStorage.removeItem('authToken');
+        setUsername('');
+        window.location.href = '/login';
       });
-      localStorage.removeItem('authToken');
-      window.location.reload();
+    } else {
+      // If no auth token, just redirect to login
+      window.location.href = '/login';
+    }
   };
 
   return (
@@ -224,7 +268,12 @@ const Navigation = () => {
           </Box>
 
           {/* Action Icons */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {username && (
+              <Typography variant="body1" sx={{ color: 'text.primary' }}>
+                {username}
+              </Typography>
+            )}
             <GlowIconButton color="inherit">
               <DarkModeIcon />
             </GlowIconButton>
