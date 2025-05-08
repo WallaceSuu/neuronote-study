@@ -90,7 +90,7 @@ const Flashcards = () => {
       }
     }
     
-    setCurrentCardIndex((prev) => (prev + 1) % flashcards.length);
+    setCurrentCardIndex((prev) => (prev + 1));
   };
 
   const handlePreviousCard = () => {

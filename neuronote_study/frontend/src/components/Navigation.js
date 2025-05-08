@@ -21,6 +21,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import NeuronIcon from "@mui/icons-material/Psychology";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { styled } from "@mui/material/styles";
+import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 // Hide AppBar on scroll down
 function HideOnScroll(props) {
@@ -123,6 +125,18 @@ const Navigation = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    axios.post(`${API_ENDPOINTS.LOGOUT}`)
+      .then(() => {
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error('Logout failed:', error);
+      });
+      localStorage.removeItem('authToken');
+      window.location.reload();
   };
 
   return (
@@ -254,7 +268,7 @@ const Navigation = () => {
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
               <Divider />
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>
         </Toolbar>

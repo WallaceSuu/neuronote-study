@@ -119,5 +119,14 @@ class RegisterUserView(APIView):
                 {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        request.user.auth_token.delete()
+        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        
     
     
