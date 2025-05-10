@@ -11,8 +11,10 @@ import {
   Drawer,
 } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteNote from './DeleteNote';
 
-const NoteSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle }) => {
+const NoteSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle, onNoteDelete }) => {
   const formatBoldText = (text) => {
     if (!text) return "";
     const cleanText = text.trim().replace(/^["']|["']$/g, '');
@@ -27,6 +29,10 @@ const NoteSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle }) =>
       }
       return part;
     });
+  };
+
+  const handleDeleteClick = (event, noteId) => {
+    event.stopPropagation(); // Prevent note selection when clicking delete
   };
 
   return (
@@ -83,12 +89,27 @@ const NoteSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle }) =>
           ) : (
             <List sx={{ flex: 1, overflow: "auto" }}>
               {notes.map((note) => (
-                <ListItem key={note.id} disablePadding>
+                <ListItem 
+                  key={note.note_id} 
+                  disablePadding
+                  secondaryAction={
+                    <DeleteNote 
+                      noteId={note.note_id} 
+                      onDelete={onNoteDelete}
+                    />
+                  }
+                  sx={{
+                    '& .MuiListItemSecondaryAction-root': {
+                      right: 8
+                    }
+                  }}
+                >
                   <ListItemButton
                     onClick={() => onNoteSelect(note)}
-                    selected={selectedNote?.id === note.id}
+                    selected={selectedNote?.note_id === note.note_id}
                     sx={{
                       borderRadius: 1,
+                      pr: 6, // Add padding to prevent text from going under delete button
                       "&:hover": {
                         backgroundColor: "rgba(255, 255, 255, 0.05)",
                       },

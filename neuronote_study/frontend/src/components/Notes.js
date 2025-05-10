@@ -34,6 +34,13 @@ const Notes = () => {
     fetchNotes();
   }, []);
 
+  const handleNoteDelete = (noteId) => {
+    setNotes(notes.filter(note => note.note_id !== noteId));
+    if (selectedNote?.note_id === noteId) {
+      setSelectedNote(null);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", height: "calc(100vh - 64px)", mt: "64px" }}>
       <NoteSidebar
@@ -42,6 +49,7 @@ const Notes = () => {
         onNoteSelect={setSelectedNote}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        onNoteDelete={handleNoteDelete}
       />
       
       <Box

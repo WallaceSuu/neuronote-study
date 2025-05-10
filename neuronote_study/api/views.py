@@ -5,10 +5,12 @@ from rest_framework import status
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
-from .models import uploadPDF, User
+from .models import uploadPDF, User, note, flashcard
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from openAI_api.views import ProcessPDFsView
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 class uploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -122,7 +124,62 @@ class getUserView(APIView):
     def get(self, request):
         user = request.user
         return Response({"username": user.username}, status=status.HTTP_200_OK)
+
+class DeleteNoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, note_id):
+        try:
+            # Get the note and verify ownership
+            note_obj = note.objects.get(id=note_id, user=request.user)
+            
+            # Delete associated flashcards first
+            flashcard.objects.filter(note=note_obj).delete()
+            
+            # Delete the note
+            note_obj.delete()
+            
+            return Response({"message": "Note deleted successfully"}, status=status.HTTP_200_OK)
+            
+        except note.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Note not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # Disable authentication for login
+    
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
         
+        if not username or not password:
+            return Response(
+                {"error": "Please provide both username and password"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = authenticate(username=username, password=password)
+        
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                "token": token.key,
+                "username": user.username,
+                "message": "Login successful"
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"error": "Invalid credentials"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
     
     

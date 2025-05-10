@@ -184,40 +184,18 @@ const Flashcards = () => {
           backdropFilter: "blur(10px)",
           borderRadius: 2,
           border: "1px solid rgba(255, 255, 255, 0.05)",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <CardContent>
-          <Typography variant="h5" sx={{ textAlign: "center", color: "white", mb: 3 }}>
-            {currentCard.question}
-          </Typography>
-          <Box sx={{ mt: 2 }}>
-            {currentCard.answers && currentCard.answers.map((answer, index) => (
-              <Button
-                key={index}
-                variant="outlined"
-                fullWidth
-                sx={{
-                  mb: 1,
-                  backgroundColor: selectedAnswer === answer 
-                    ? (answer.is_correct ? '#4caf50' : '#f44336')
-                    : 'transparent',
-                  color: selectedAnswer === answer ? 'white' : 'inherit',
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                  '&:hover': {
-                    backgroundColor: selectedAnswer === answer 
-                      ? (answer.is_correct ? '#388e3c' : '#d32f2f')
-                      : 'rgba(255, 255, 255, 0.04)',
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                  },
-                }}
-                onClick={() => handleAnswerClick(answer)}
-              >
-                {answer.text}
-              </Button>
-            ))}
-          </Box>
-        </CardContent>
-        <CardActions sx={{ justifyContent: "space-between", p: 2 }}>
+        <CardActions 
+          sx={{ 
+            justifyContent: "space-between", 
+            p: 2,
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+          }}
+        >
           <Button 
             onClick={handlePreviousCard}
             variant="outlined"
@@ -226,7 +204,7 @@ const Flashcards = () => {
           >
             Previous
           </Button>
-          <Box>
+          <Box sx={{ color: "white" }}>
             {currentCardIndex+1}/{flashcards.length}
           </Box>
           <Button 
@@ -238,6 +216,71 @@ const Flashcards = () => {
             {isGenerating ? "Generating..." : "Next"}
           </Button>
         </CardActions>
+        <CardContent sx={{ flex: 1, overflow: "auto", p: 3 }}>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              textAlign: "center", 
+              color: "white", 
+              mb: 3,
+              fontSize: "1.25rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              letterSpacing: "0.01em",
+              textShadow: "0 1px 2px rgba(0,0,0,0.1)"
+            }}
+          >
+            {currentCard.question}
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            {currentCard.answers && currentCard.answers.map((answer, index) => (
+              <Button
+                key={index}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 1.5,
+                  p: 1.5,
+                  backgroundColor: selectedAnswer === answer 
+                    ? (answer.is_correct ? '#4caf50' : '#f44336')
+                    : 'rgba(255, 255, 255, 0.05)',
+                  color: selectedAnswer === answer ? 'white' : 'rgba(255, 255, 255, 0.9)',
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  fontSize: '0.9rem',
+                  fontWeight: 400,
+                  textTransform: 'none',
+                  justifyContent: 'flex-start',
+                  textAlign: 'left',
+                  '&:hover': {
+                    backgroundColor: selectedAnswer === answer 
+                      ? (answer.is_correct ? '#388e3c' : '#d32f2f')
+                      : 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                  },
+                }}
+                onClick={() => handleAnswerClick(answer)}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  width: '100%'
+                }}>
+                  <Box sx={{ 
+                    minWidth: '24px',
+                    mr: 1.5,
+                    fontWeight: 600,
+                    color: selectedAnswer === answer 
+                      ? 'white' 
+                      : 'rgba(255, 255, 255, 0.7)'
+                  }}>
+                    {String.fromCharCode(65 + index)}.
+                  </Box>
+                  {answer.text}
+                </Box>
+              </Button>
+            ))}
+          </Box>
+        </CardContent>
       </Card>
     );
   };

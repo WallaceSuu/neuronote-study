@@ -57,9 +57,6 @@ class LoginView(APIView):
         logout(request)
         return Response({"message": "User logged out successfully"}, status=status.HTTP_200_OK)
 
-#future note for myself, use @login_required or IsAuthenticated decorator to protect 
-#the views and only let authenticated users access them
-
 @login_required
 def change_password(request):
     if request.method == 'POST':

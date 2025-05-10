@@ -59,16 +59,13 @@ class note(models.Model):
         return self.note_title if self.note_title else self.note_text[:50]
 
     def delete(self, *args, **kwargs):
-        # Store references before deletion
+        # Store reference to PDF before deletion
         pdf = self.note_key
-        user = self.user
         # Delete the note
         super().delete(*args, **kwargs)
-        # Clean up any orphaned PDFs or users if needed
+        # Clean up any orphaned PDFs if needed
         if pdf and not pdf.pdf_notes.exists():
             pdf.delete()
-        if user and not user.user_notes.exists():
-            user.delete()
 
 class flashcard(models.Model):
     flashcard_title = models.CharField(max_length=255, null=True, blank=True)
