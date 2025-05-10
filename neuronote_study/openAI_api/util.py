@@ -75,11 +75,46 @@ def generate_flashcards(note_text):
         model="gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that generates answers for a given text of summary notes."},
-            {"role": "user", "content": f"Please generate four wrong answers and one correct answer for the following question; make the false answers plausible:\n\n{flashcard_question} using the following text:\n\n{note_text}, separate the answers with the character '|' also highlight the correct answer with the characters '**'. Make sure that you only generate one correct answer."}
+            {"role": "user", "content": f"""
+                                        You are a multiple-choice quiz generator.
+
+                                        Task:
+                                        Generate one multiple-choice question using the provided question and reference text.
+
+                                        Inputs:
+                                        - Question: {flashcard_question.choices[0].message.content}
+                                        - Reference Text: {note_text}
+
+                                        Output Format (strict):
+                                        1. Provide 5 answer options labeled A–E.
+                                        2. Mark exactly ONE correct answer with a leading asterisk (*).
+                                        3. Do NOT explain the answer.
+                                        4. Follow this exact format with no additional text:
+
+                                        Q: <question text>
+                                        A. <option>
+                                        B. <option>
+                                        C. <option>
+                                        D. <option>
+                                        E. <option>
+
+                                        Example (format only):
+                                        Q: What is 2 + 2?
+                                        A. 3
+                                        B. 5
+                                        C. *4
+                                        D. 6
+                                        E. 9
+
+                                        Begin:
+                                        """
+                                        }
         ],
-        max_tokens=100,
+        max_tokens=300,
         temperature=1.2
     )
+
+    print(flashcard_answers.choices[0].message.content)
 
     return {
         "flashcard_question": flashcard_question.choices[0].message.content,

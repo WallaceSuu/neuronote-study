@@ -191,27 +191,28 @@ class generateFlashcardsView(APIView):
                 note=note_obj
             )
 
-            # Split answers by '|' and handle the correct answer formatting
-            answers = [answer.strip() for answer in flashcard_answers.split("|") if answer.strip()]
+            # Parse the lettered format answers
             formatted_answers = []
-            
-            for answer in answers:
-                is_correct = False
-                if "**" in answer:
-                    # Remove the ** markers and mark a  s cor rect
-                    answer = answer[2:-2].strip()
-                    is_correct = True
-                
-                new_flashcard_answer = flashcard_answer.objects.create(
-                    flashcard_answer=new_flashcard,
-                    answer_text=answer,
-                    is_correct=is_correct
-                )
-                new_flashcard_answer.save()
-                formatted_answers.append({
-                    'text': answer,
-                    'is_correct': is_correct
-                })
+            for line in flashcard_answers.split('\n'):
+                line = line.strip()
+                if line and line[0] in 'ABCDE' and '. ' in line:
+                    # Extract the answer text after the letter and dot
+                    answer_text = line.split('. ', 1)[1].strip()
+                    is_correct = answer_text.startswith('*') or '*' in answer_text
+                    if is_correct:
+                        # Remove the asterisk from the answer text
+                        answer_text = answer_text.replace('*', '')
+                    
+                    new_flashcard_answer = flashcard_answer.objects.create(
+                        flashcard_answer=new_flashcard,
+                        answer_text=answer_text,
+                        is_correct=is_correct
+                    )
+                    new_flashcard_answer.save()
+                    formatted_answers.append({
+                        'text': answer_text,
+                        'is_correct': is_correct
+                    })
 
             new_flashcard.save()
 
