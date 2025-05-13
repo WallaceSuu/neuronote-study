@@ -164,6 +164,10 @@ const Navigation = () => {
     setAnchorEl(null);
   };
 
+  const handleProfileClick = () => {
+    window.location.href = '/profile';
+  };
+
   const handleLogout = () => {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
@@ -321,7 +325,7 @@ const Navigation = () => {
                 },
               }}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
               <Divider sx={{ borderColor: theme.palette.divider }} />
               <MenuItem onClick={handleLogout}>Logout</MenuItem>

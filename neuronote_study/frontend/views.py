@@ -21,3 +21,6 @@ def login(request):
 def register(request):
     return render(request, 'frontend/index.html')
 
+def profile(request):
+    return render(request, 'frontend/index.html')
+

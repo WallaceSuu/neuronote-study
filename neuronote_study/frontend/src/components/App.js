@@ -9,6 +9,7 @@ import About from "./About";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import Flashcards from "./Flashcards";
+import Profile from "./Profile";
 import { Box } from "@mui/material";
 import { ThemeProvider } from "../context/ThemeContext";
 
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<LandingPage />} />
             </Routes>
           </Box>
