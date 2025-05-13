@@ -7,12 +7,14 @@ import {
   CardContent,
   CardActions,
   Button,
+  useTheme,
 } from "@mui/material";
 import FlashcardSidebar from "./FlashcardSidebar";
 import axios from "axios";
 import { API_ENDPOINTS, axiosConfig } from "../config";
 
 const Flashcards = () => {
+  const theme = useTheme();
   const [selectedNote, setSelectedNote] = useState(null);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +130,7 @@ const Flashcards = () => {
   const renderFlashcard = () => {
     if (!selectedNote) {
       return (
-        <Typography sx={{ textAlign: "center", color: "rgba(255, 255, 255, 0.7)" }}>
+        <Typography sx={{ textAlign: "center", color: theme.palette.text.secondary }}>
           Select a note to view its flashcards
         </Typography>
       );
@@ -153,7 +155,7 @@ const Flashcards = () => {
     if (flashcards.length === 0) {
       return (
         <Box sx={{ textAlign: "center", mt: 4 }}>
-          <Typography sx={{ color: "rgba(255, 255, 255, 0.7)", mb: 2 }}>
+          <Typography sx={{ color: theme.palette.text.secondary, mb: 2 }}>
             No flashcards available for this note.
           </Typography>
           <Button 
@@ -161,9 +163,10 @@ const Flashcards = () => {
             onClick={handleGenerateFlashcards}
             disabled={isGenerating}
             sx={{ 
-              backgroundColor: "rgba(33, 150, 243, 0.8)",
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
               "&:hover": {
-                backgroundColor: "rgba(33, 150, 243, 0.9)",
+                backgroundColor: theme.palette.primary.dark,
               }
             }}
           >
@@ -180,10 +183,10 @@ const Flashcards = () => {
         sx={{ 
           maxWidth: 600, 
           mx: "auto",
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
+          backgroundColor: theme.palette.background.paper,
           backdropFilter: "blur(10px)",
           borderRadius: 2,
-          border: "1px solid rgba(255, 255, 255, 0.05)",
+          border: `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column",
         }}
@@ -192,26 +195,26 @@ const Flashcards = () => {
           sx={{ 
             justifyContent: "space-between", 
             p: 2,
-            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.action.hover,
           }}
         >
           <Button 
             onClick={handlePreviousCard}
             variant="outlined"
             disabled={isGenerating}
-            sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+            sx={{ color: theme.palette.text.primary, borderColor: theme.palette.divider }}
           >
             Previous
           </Button>
-          <Box sx={{ color: "white" }}>
+          <Box sx={{ color: theme.palette.text.primary }}>
             {currentCardIndex+1}/{flashcards.length}
           </Box>
           <Button 
             onClick={handleNextCard}
             variant="outlined"
             disabled={isGenerating}
-            sx={{ color: "white", borderColor: "rgba(255, 255, 255, 0.3)" }}
+            sx={{ color: theme.palette.text.primary, borderColor: theme.palette.divider }}
           >
             {isGenerating ? "Generating..." : "Next"}
           </Button>
@@ -221,64 +224,72 @@ const Flashcards = () => {
             variant="h5" 
             sx={{ 
               textAlign: "center", 
-              color: "white", 
+              color: theme.palette.text.primary, 
               mb: 3,
               fontSize: "1.25rem",
               fontWeight: 500,
               lineHeight: 1.3,
               letterSpacing: "0.01em",
-              textShadow: "0 1px 2px rgba(0,0,0,0.1)"
+              textShadow: theme.palette.mode === 'dark' ? "0 1px 2px rgba(0,0,0,0.1)" : undefined
             }}
           >
             {currentCard.question}
           </Typography>
           <Box sx={{ mt: 2 }}>
-            {currentCard.answers && currentCard.answers.map((answer, index) => (
-              <Button
-                key={index}
-                variant="outlined"
-                fullWidth
-                sx={{
-                  mb: 1.5,
-                  p: 1.5,
-                  backgroundColor: selectedAnswer === answer 
-                    ? (answer.is_correct ? '#4caf50' : '#f44336')
-                    : 'rgba(255, 255, 255, 0.05)',
-                  color: selectedAnswer === answer ? 'white' : 'rgba(255, 255, 255, 0.9)',
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
-                  fontSize: '0.9rem',
-                  fontWeight: 400,
-                  textTransform: 'none',
-                  justifyContent: 'flex-start',
-                  textAlign: 'left',
-                  '&:hover': {
-                    backgroundColor: selectedAnswer === answer 
-                      ? (answer.is_correct ? '#388e3c' : '#d32f2f')
-                      : 'rgba(255, 255, 255, 0.1)',
-                    borderColor: 'rgba(255, 255, 255, 0.3)',
-                  },
-                }}
-                onClick={() => handleAnswerClick(answer)}
-              >
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  width: '100%'
-                }}>
+            {currentCard.answers && currentCard.answers.map((answer, index) => {
+              const isSelected = selectedAnswer === answer;
+              const isCorrect = answer.is_correct;
+              let bgColor = theme.palette.background.paper;
+              let color = theme.palette.text.primary;
+              let hoverBg = theme.palette.action.hover;
+              if (isSelected) {
+                bgColor = isCorrect ? theme.palette.success.main : theme.palette.error.main;
+                color = theme.palette.getContrastText(bgColor);
+                hoverBg = isCorrect ? theme.palette.success.dark : theme.palette.error.dark;
+              }
+              return (
+                <Button
+                  key={index}
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    mb: 1.5,
+                    p: 1.5,
+                    backgroundColor: bgColor,
+                    color: color,
+                    borderColor: theme.palette.divider,
+                    fontSize: '0.9rem',
+                    fontWeight: 400,
+                    textTransform: 'none',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    '&:hover': {
+                      backgroundColor: hoverBg,
+                      borderColor: theme.palette.divider,
+                    },
+                  }}
+                  onClick={() => handleAnswerClick(answer)}
+                >
                   <Box sx={{ 
-                    minWidth: '24px',
-                    mr: 1.5,
-                    fontWeight: 600,
-                    color: selectedAnswer === answer 
-                      ? 'white' 
-                      : 'rgba(255, 255, 255, 0.7)'
+                    display: 'flex', 
+                    alignItems: 'center',
+                    width: '100%'
                   }}>
-                    {String.fromCharCode(65 + index)}.
+                    <Box sx={{ 
+                      minWidth: '24px',
+                      mr: 1.5,
+                      fontWeight: 600,
+                      color: isSelected
+                        ? color
+                        : theme.palette.text.secondary
+                    }}>
+                      {String.fromCharCode(65 + index)}.
+                    </Box>
+                    {answer.text}
                   </Box>
-                  {answer.text}
-                </Box>
-              </Button>
-            ))}
+                </Button>
+              );
+            })}
           </Box>
         </CardContent>
       </Card>
@@ -315,7 +326,7 @@ const Flashcards = () => {
           </Typography>
         ) : notes.length === 0 ? (
           <Typography
-            sx={{ textAlign: "center", mt: 4, color: "rgba(255, 255, 255, 0.7)" }}
+            sx={{ textAlign: "center", mt: 4, color: theme.palette.text.secondary }}
           >
             No notes found. Upload a PDF to create your first set of flashcards!
           </Typography>

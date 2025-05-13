@@ -1,5 +1,4 @@
 import React from "react";
-import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./LandingPage";
@@ -11,11 +10,11 @@ import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import Flashcards from "./Flashcards";
 import { Box } from "@mui/material";
-import theme from "../theme";
+import { ThemeProvider } from "../context/ThemeContext";
 
 const App = () => {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <CssBaseline />
       <BrowserRouter>
         <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>

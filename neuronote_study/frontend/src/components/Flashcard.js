@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
+import { useThemeContext } from '../context/ThemeContext';
 
 const Flashcard = () => {
     const [flashcards, setFlashcards] = useState([]);
@@ -58,7 +59,7 @@ const Flashcard = () => {
     const renderFlashcard = () => {
         if (!flashcards || flashcards.length === 0) {
             return (
-                <Typography sx={{ textAlign: "center", color: "rgba(255, 255, 255, 0.7)" }}>
+                <Typography sx={{ textAlign: "center", color: {} }}>
                     No flashcards available.
                 </Typography>
             );

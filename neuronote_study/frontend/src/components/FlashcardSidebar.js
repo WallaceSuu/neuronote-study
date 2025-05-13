@@ -9,18 +9,20 @@ import {
   Divider,
   IconButton,
   Drawer,
+  useTheme,
 } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 
 const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle }) => {
+  const theme = useTheme();
   const formatBoldText = (text) => {
     if (!text) return "";
-    const cleanText = text.trim().replace(/^["']|["']$/g, '');
+    const cleanText = text.trim().replace(/^\"|\"$/g, '');
     const parts = cleanText.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
-          <span key={index} style={{ fontWeight: 'bold', color: 'white' }}>
+          <span key={index} style={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             {part.slice(2, -2)}
           </span>
         );
@@ -38,14 +40,14 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
           left: isOpen ? 320 : 20,
           top: '84px',
           zIndex: 1200,
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: theme.palette.action.hover,
           '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            backgroundColor: theme.palette.action.selected,
           },
           transition: 'left 0.2s ease-in-out',
         }}
       >
-        <MenuIcon sx={{ color: 'white' }} />
+        <MenuIcon sx={{ color: theme.palette.text.primary }} />
       </IconButton>
       <Drawer
         variant="persistent"
@@ -54,9 +56,9 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
         sx={{
           '& .MuiDrawer-paper': {
             width: 320,
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            backgroundColor: theme.palette.background.sidebar,
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
+            border: `1px solid ${theme.palette.divider}`,
             boxShadow: 'none',
             top: '64px',
             height: 'calc(100% - 64px)',
@@ -65,15 +67,15 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
         }}
       >
         <Box sx={{ p: 2, flex: 1, display: "flex", flexDirection: "column", height: '100%' }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.primary }}>
             Flashcard Sets
           </Typography>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, borderColor: theme.palette.divider }} />
           {notes.length === 0 ? (
             <Typography
               variant="body2"
               sx={{
-                color: "rgba(255, 255, 255, 0.5)",
+                color: theme.palette.text.secondary,
                 textAlign: "center",
                 mt: 2,
               }}
@@ -90,10 +92,10 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
                     sx={{
                       borderRadius: 1,
                       "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 0.05)",
+                        backgroundColor: theme.palette.action.hover,
                       },
                       "&.Mui-selected": {
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        backgroundColor: theme.palette.action.selected,
                       },
                     }}
                   >
@@ -101,7 +103,7 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
                       primary={
                         <Typography 
                           sx={{ 
-                            color: "white",
+                            color: theme.palette.text.primary,
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
@@ -112,7 +114,7 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
                       }
                       secondary={
                         <Typography
-                          sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+                          sx={{ color: theme.palette.text.secondary }}
                           variant="body2"
                         >
                           {note.flashcards?.length || 0} cards

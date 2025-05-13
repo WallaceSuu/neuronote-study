@@ -13,6 +13,7 @@ import {
   MenuItem,
   alpha,
   Divider,
+  useTheme,
 } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -20,9 +21,11 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import NeuronIcon from "@mui/icons-material/Psychology";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config";
+import { useThemeContext } from "../context/ThemeContext";
 
 // Hide AppBar on scroll down
 function HideOnScroll(props) {
@@ -38,10 +41,12 @@ function HideOnScroll(props) {
 
 // Glass effect AppBar
 const GlassAppBar = styled(AppBar)(({ theme }) => ({
-  background: "rgba(10, 10, 20, 0.7)",
-  backdropFilter: "blur(10px)",
-  borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-  boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.2)}`,
+  background: theme.palette.background.nav,
+  backdropFilter: theme.palette.mode === 'dark' ? 'blur(10px)' : undefined,
+  borderBottom: `1px solid ${theme.palette.divider}`,
+  boxShadow: theme.palette.mode === 'dark'
+    ? `0 4px 20px ${alpha(theme.palette.primary.main, 0.2)}`
+    : '0 2px 8px #0000000a',
 }));
 
 // Logo text with special styling
@@ -117,6 +122,8 @@ const GlowIconButton = styled(IconButton)(({ theme }) => ({
 const Navigation = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [username, setUsername] = useState('');
+  const { isDarkMode, toggleTheme } = useThemeContext();
+  const theme = useTheme();
   const open = Boolean(anchorEl);
   const location = useLocation();
 
@@ -274,8 +281,8 @@ const Navigation = () => {
                 {username}
               </Typography>
             )}
-            <GlowIconButton color="inherit">
-              <DarkModeIcon />
+            <GlowIconButton color="inherit" onClick={toggleTheme}>
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </GlowIconButton>
             <GlowIconButton color="inherit">
               <NotificationsIcon />
@@ -316,7 +323,7 @@ const Navigation = () => {
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
               <MenuItem onClick={handleClose}>My account</MenuItem>
-              <Divider />
+              <Divider sx={{ borderColor: theme.palette.divider }} />
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>

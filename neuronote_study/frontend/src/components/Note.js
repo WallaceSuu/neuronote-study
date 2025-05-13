@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Box, Paper, Typography, Button, Stack, Container } from "@mui/material";
+import { Box, Paper, Typography, Button, Stack, Container, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
+import { useThemeContext } from "../context/ThemeContext";
 
 const Note = ({ selectedNote }) => {
+  const themeContext = useThemeContext();
   const theme = useTheme();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,7 +22,7 @@ const Note = ({ selectedNote }) => {
     return parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
-          <span key={index} style={{ fontWeight: 'bold', color: 'white' }}>
+          <span key={index} style={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             {part.slice(2, -2)}
           </span>
         );
@@ -32,14 +33,11 @@ const Note = ({ selectedNote }) => {
 
   const formatNoteText = (text) => {
     if (!text) return "";
-    
     // Split the text into sections based on headers
     const sections = text.split(/(?=###)/);
-    
     return sections.map((section, index) => {
       // Split each section into lines and preserve empty lines
       const lines = section.split(/\n/);
-      
       return (
         <Box key={index} sx={{ mb: 3 }}>
           {lines.map((line, lineIndex) => {
@@ -47,14 +45,13 @@ const Note = ({ selectedNote }) => {
             if (line.trim() === '') {
               return <Box key={lineIndex} sx={{ height: '1em' }} />;
             }
-            
             // Handle different types of content
             if (line.startsWith('###')) {
               return (
                 <Typography
                   key={lineIndex}
                   variant="h6"
-                  sx={{ color: "white", mb: 2, mt: 3 }}
+                  sx={{ color: theme.palette.text.primary, mb: 2, mt: 3 }}
                 >
                   {line.replace('###', '').trim()}
                 </Typography>
@@ -66,12 +63,12 @@ const Note = ({ selectedNote }) => {
                 <Typography
                   key={lineIndex}
                   variant="body1"
-                  sx={{ color: "rgba(255, 255, 255, 0.8)", ml: 2, mb: 1 }}
+                  sx={{ color: theme.palette.text.primary, ml: 2, mb: 1 }}
                 >
                   • {parts.map((part, partIndex) => {
                     if (part.startsWith('**') && part.endsWith('**')) {
                       return (
-                        <span key={partIndex} style={{ fontWeight: 'bold', color: 'white' }}>
+                        <span key={partIndex} style={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
                           {part.slice(2, -2)}
                         </span>
                       );
@@ -88,7 +85,7 @@ const Note = ({ selectedNote }) => {
                   key={lineIndex}
                   variant="body1"
                   sx={{ 
-                    color: "rgba(255, 255, 255, 0.8)", 
+                    color: theme.palette.text.primary, 
                     mb: 1,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word'
@@ -97,7 +94,7 @@ const Note = ({ selectedNote }) => {
                   {parts.map((part, partIndex) => {
                     if (part.startsWith('**') && part.endsWith('**')) {
                       return (
-                        <span key={partIndex} style={{ fontWeight: 'bold', color: 'white' }}>
+                        <span key={partIndex} style={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
                           {part.slice(2, -2)}
                         </span>
                       );
@@ -119,17 +116,17 @@ const Note = ({ selectedNote }) => {
         <Paper
           sx={{
             p: 4,
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(10px)",
+            backgroundColor: theme.palette.background.paper,
+            backdropFilter: theme.palette.mode === 'dark' ? 'blur(10px)' : undefined,
             borderRadius: 2,
-            border: "1px dashed rgba(33, 150, 243, 0.5)",
+            border: `1px dashed ${theme.palette.primary.main}`,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: 2,
           }}
         >
-          <Typography variant="h6" sx={{ color: "white" }}>
+          <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
             Please log in to view notes
           </Typography>
           <Stack direction="row" spacing={2}>
@@ -138,6 +135,7 @@ const Note = ({ selectedNote }) => {
               onClick={() => navigate("/login")}
               sx={{
                 backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
                 "&:hover": {
                   backgroundColor: theme.palette.primary.dark,
                 },
@@ -153,7 +151,7 @@ const Note = ({ selectedNote }) => {
                 color: theme.palette.primary.main,
                 "&:hover": {
                   borderColor: theme.palette.primary.dark,
-                  backgroundColor: "rgba(33, 150, 243, 0.1)",
+                  backgroundColor: theme.palette.action.hover,
                 },
               }}
             >
@@ -171,10 +169,10 @@ const Note = ({ selectedNote }) => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(10px)",
+        backgroundColor: theme.palette.background.paper,
+        backdropFilter: theme.palette.mode === 'dark' ? 'blur(10px)' : undefined,
         borderRadius: 2,
-        border: "1px solid rgba(255, 255, 255, 0.05)",
+        border: `1px solid ${theme.palette.divider}`,
         p: 3,
         maxWidth: "100%",
         mx: "auto",
@@ -183,7 +181,7 @@ const Note = ({ selectedNote }) => {
     >
       {selectedNote ? (
         <>
-          <Typography variant="h5" sx={{ mb: 3, color: "white" }}>
+          <Typography variant="h5" sx={{ mb: 3, color: theme.palette.text.primary }}>
             {formatBoldText(selectedNote.note_title)}
           </Typography>
           <Box sx={{ flex: 1, overflow: "auto" }}>
@@ -199,7 +197,7 @@ const Note = ({ selectedNote }) => {
             justifyContent: "center",
           }}
         >
-          <Typography variant="h6" sx={{ color: "rgba(255, 255, 255, 0.5)" }}>
+          <Typography variant="h6" sx={{ color: theme.palette.text.secondary }}>
             Select a note from the sidebar
           </Typography>
         </Box>

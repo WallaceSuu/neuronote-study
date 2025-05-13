@@ -8,12 +8,12 @@ const LandingPage = () => {
   return (
     <Box
       sx={{
-        bgcolor: "#000",
+        bgcolor: theme.palette.background.default,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        color: "white",
+        color: theme.palette.text.primary,
         minHeight: "100%",
         py: 4,
       }}
@@ -25,10 +25,10 @@ const LandingPage = () => {
           sx={{
             mb: 4,
             textAlign: "center",
-            background: "linear-gradient(90deg, #00bcd4, #2196f3)",
+            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            textShadow: "0 0 20px rgba(33, 150, 243, 0.3)",
+            textShadow: `0 0 20px ${theme.palette.primary.main}33`, // 33 = 0.2 alpha
           }}
         >
           Neuronote Study
@@ -39,7 +39,7 @@ const LandingPage = () => {
           sx={{
             mb: 6,
             textAlign: "center",
-            color: "#aaa",
+            color: theme.palette.text.secondary,
           }}
         >
           Transform your lecture slides into interactive study materials
@@ -53,13 +53,14 @@ const LandingPage = () => {
             size="large"
             sx={{
               backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
               "&:hover": {
                 backgroundColor: theme.palette.primary.dark,
                 transform: "translateY(-2px)",
-                boxShadow: "0 5px 15px rgba(33, 150, 243, 0.3)",
+                boxShadow: `0 5px 15px ${theme.palette.primary.main}33`,
               },
               transition: "all 0.2s",
-              boxShadow: "0 3px 8px rgba(33, 150, 243, 0.2)",
+              boxShadow: `0 3px 8px ${theme.palette.primary.main}22`,
               px: 4,
               py: 1.5,
             }}
@@ -76,7 +77,7 @@ const LandingPage = () => {
               color: theme.palette.secondary.main,
               "&:hover": {
                 borderColor: theme.palette.secondary.light,
-                backgroundColor: "rgba(0, 188, 212, 0.08)",
+                backgroundColor: theme.palette.secondary.light + '14', // 14 = 8% alpha
                 transform: "translateY(-2px)",
               },
               transition: "all 0.2s",
