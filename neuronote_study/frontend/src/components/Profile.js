@@ -27,6 +27,10 @@ import EditProfile from './EditProfile';
 const Profile = () => {
 
     const [isEditing, setIsEditing] = useState(false);
+    const [userDetails, setUserDetails] = useState(null);
+    const [flashcards, setFlashcards] = useState(null);
+    const [notes, setNotes] = useState(null);
+    const [pdfs, setPDFs] = useState(null);
 
     const handleEditProfile = () => {
         setIsEditing(true);
@@ -35,18 +39,87 @@ const Profile = () => {
     const handleCloseEdit = () => {
         setIsEditing(false);
     };
+
+    const fetchUserDetails = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(API_ENDPOINTS.USER, {
+                headers: {
+                    'Authorization': `Token ${token}` 
+                }
+            });
+            setUserDetails(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+        }
+    };
+
+    const fetchUserPDFs = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(API_ENDPOINTS.GET_USER_PDFS, {
+                headers: {
+                    'Authorization': `Token ${token}`
+                }
+            });
+            setPDFs(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error fetching user PDFs:', error);
+        }
+    };
+
+    const fetchFlashcards = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(API_ENDPOINTS.GET_FLASHCARDS, {
+                headers: {
+                    'Authorization': `Token ${token}` 
+                }
+            });
+            setFlashcards(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error fetching flashcards:', error);
+        }
+    };
+
+    const fetchNotes = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(API_ENDPOINTS.NOTES, {
+                headers: {
+                    'Authorization': `Token ${token}` 
+                }
+            });
+            setNotes(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+        }
+    };
     
-    return (
+
+    useEffect(() => {
+        fetchUserDetails();
+        fetchUserPDFs();
+        fetchFlashcards();
+        fetchNotes();
+    }, []);
+    
+    
+    return userDetails !== null ? (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* User Info Section */}
             <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
                 <Grid container spacing={3} alignItems="center">
                     <Grid item>
                         <Avatar sx={{ width: 100, height: 100 }}>JD</Avatar>
                     </Grid>
                     <Grid item xs>
-                        <Typography variant="h4">John Doe</Typography>
-                        <Typography variant="subtitle1" color="text.secondary">@johndoe</Typography>
+                        <Typography variant="h4">{userDetails.username}</Typography>
+                        <Typography variant="subtitle1" color="text.secondary">{userDetails.email}</Typography>
+                        <Typography variant="subtitle2" color="text.secondary">{userDetails.is_active === true ? "Currently Online" : "Currently    Offline"}</Typography>
                     </Grid>
                     <Grid item>
                         <Button variant="contained" color="primary" onClick={handleEditProfile}>
@@ -65,7 +138,7 @@ const Profile = () => {
                                 <DescriptionIcon sx={{ mr: 1 }} />
                                 PDFs
                             </Typography>
-                            <Typography variant="h4">5</Typography>
+                            <Typography variant="h4">{pdfs ? pdfs.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -76,7 +149,7 @@ const Profile = () => {
                                 <NoteIcon sx={{ mr: 1 }} />
                                 Notes
                             </Typography>
-                            <Typography variant="h4">12</Typography>
+                            <Typography variant="h4">{notes ? notes.notes.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -87,7 +160,7 @@ const Profile = () => {
                                 <SchoolIcon sx={{ mr: 1 }} />
                                 Flashcards
                             </Typography>
-                            <Typography variant="h4">25</Typography>
+                            <Typography variant="h4">{flashcards ? flashcards.flashcards.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
@@ -163,6 +236,10 @@ const Profile = () => {
             </Grid>
 
             <EditProfile open={isEditing} onClose={handleCloseEdit} />
+        </Container>
+    ) : (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Typography variant="h4">Unable to fetch user details, please try again later.</Typography>
         </Container>
     );
 };

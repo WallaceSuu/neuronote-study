@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   FLASHCARDS: `${API_BASE_URL}/openai/flashcards/`,
   GENERATE_FLASHCARDS: `${API_BASE_URL}/openai/generate-flashcards/`,
   GET_FLASHCARDS: `${API_BASE_URL}/openai/get-flashcards/`,
+  GET_USER_PDFS: `${API_BASE_URL}/api/get-user-pdfs/`,
   LOGOUT: `${API_BASE_URL}/api/logout/`,
   USER: `${API_BASE_URL}/api/user/`,
 };

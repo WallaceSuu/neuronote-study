@@ -11,6 +11,7 @@ from openAI_api.views import ProcessPDFsView
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from .serializers import *
 
 class uploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -46,6 +47,15 @@ class uploadPDFView(APIView):
             "message": "File uploaded and processed successfully",
             "note_generation": process_response.data
         }, status=status.HTTP_200_OK)
+
+class getUserPDFsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        pdfs = uploadPDF.objects.filter(user=user)
+        serializer = UploadPDFSerializer(pdfs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -123,7 +133,8 @@ class getUserView(APIView):
 
     def get(self, request):
         user = request.user
-        return Response({"username": user.username}, status=status.HTTP_200_OK)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class DeleteNoteView(APIView):
     permission_classes = [IsAuthenticated]
