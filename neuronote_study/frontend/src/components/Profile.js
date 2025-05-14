@@ -219,6 +219,11 @@ const Profile = () => {
                                                     {note.note_title.replace(/\*\*/g, '')}
                                                 </Typography>
                                             }
+                                            secondary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {new Date(note.created_at).toLocaleString()}
+                                                </Typography>
+                                            }
                                         />
                                     </ListItem>
                                 ))}

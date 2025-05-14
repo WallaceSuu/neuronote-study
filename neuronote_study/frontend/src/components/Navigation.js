@@ -262,6 +262,14 @@ const Navigation = () => {
             </NavButton>
             <NavButton
               component={RouterLink}
+              to="/chatbox"
+              color="inherit"
+              active={location.pathname === "/chatbox"}
+            >
+              Chat
+            </NavButton>
+            <NavButton
+              component={RouterLink}
               to="/analytics"
               color="inherit"
               active={location.pathname === "/analytics"}

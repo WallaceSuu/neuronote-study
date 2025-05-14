@@ -24,3 +24,7 @@ def register(request):
 def profile(request):
     return render(request, 'frontend/index.html')
 
+def chatbox(request):
+    return render(request, 'frontend/index.html')
+
+
