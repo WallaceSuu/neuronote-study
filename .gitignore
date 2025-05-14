@@ -69,3 +69,10 @@ local_settings.py
 # System
 .DS_Store
 Thumbs.db
+
+# VSCodeCounter output
+.VSCodeCounter/*.csv
+.VSCodeCounter/*.md
+.VSCodeCounter/*.json 
+.VSCodeCounter/2025-05-14_01-00-51/details.md
+/.VSCodeCounter

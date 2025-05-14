@@ -10,7 +10,7 @@ import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
 import Flashcards from "./Flashcards";
 import Profile from "./Profile";
-import ChatBox from "./ChatBox";
+import ChatPage from "./ChatPage";
 import { Box } from "@mui/material";
 import { ThemeProvider } from "../context/ThemeContext";
 
@@ -35,7 +35,7 @@ const App = () => {
               <Route path="/submit" element={<SubmitPDF />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/flashcards" element={<Flashcards />} />
-              <Route path="/chatbox" element={<ChatBox />} />
+              <Route path="/chat" element={<ChatPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
