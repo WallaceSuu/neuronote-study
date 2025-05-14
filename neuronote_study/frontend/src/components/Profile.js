@@ -169,68 +169,93 @@ const Profile = () => {
             {/* Recent Activity */}
             <Grid container spacing={3}>
                 {/* Recent PDFs */}
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ p: 2 }}>
+                <Grid item xs={12} md={4}>
+                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
                         <Typography variant="h6" gutterBottom>Recent PDFs</Typography>
-                        <List>
-                            {[1, 2, 3].map((item) => (
-                                <ListItem key={item}>
-                                    <ListItemAvatar>
-                                        <Avatar>
-                                            <DescriptionIcon />
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText 
-                                        primary="Sample PDF Document"
-                                        secondary="Uploaded 2 days ago"
-                                    />
-                                </ListItem>
-                            ))}
-                        </List>
+                        <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
+                            <List disablePadding>
+                                {pdfs && pdfs.slice(0, 3).map((pdf) => (
+                                    <ListItem key={pdf.id}>
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <DescriptionIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {pdf.pdf_name}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {`Uploaded on ${new Date(pdf.created_at).toLocaleDateString()}`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
                     </Paper>
                 </Grid>
 
                 {/* Recent Notes */}
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ p: 2 }}>
+                <Grid item xs={12} md={4}>
+                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
                         <Typography variant="h6" gutterBottom>Recent Notes</Typography>
-                        <List>
-                            {[1, 2, 3].map((item) => (
-                                <ListItem key={item}>
-                                    <ListItemAvatar>
-                                        <Avatar>
-                                            <NoteIcon />
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText 
-                                        primary="Study Notes"
-                                        secondary="Created 1 day ago"
-                                    />
-                                </ListItem>
-                            ))}
-                        </List>
+                        <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
+                            <List disablePadding>
+                                {notes && notes.notes.slice(0, 3).map((note) => (
+                                    <ListItem key={note.note_id}>
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <NoteIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {note.note_title.replace(/\*\*/g, '')}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
                     </Paper>
                 </Grid>
 
                 {/* Recent Flashcards */}
-                <Grid item xs={12}>
-                    <Paper elevation={3} sx={{ p: 2 }}>
+                <Grid item xs={12} md={4}>
+                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
                         <Typography variant="h6" gutterBottom>Recent Flashcards</Typography>
-                        <List>
-                            {[1, 2, 3].map((item) => (
-                                <ListItem key={item}>
-                                    <ListItemAvatar>
-                                        <Avatar>
-                                            <SchoolIcon />
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText 
-                                        primary="Biology Chapter 1"
-                                        secondary="Created 3 days ago"
-                                    />
-                                </ListItem>
-                            ))}
-                        </List>
+                        <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
+                            <List disablePadding>
+                                {flashcards && flashcards.flashcards.slice(0, 3).map((flashcard) => (
+                                    <ListItem key={flashcard.id}>
+                                        <ListItemAvatar>
+                                            <Avatar>
+                                                <SchoolIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {flashcard.title.replace(/\*\*/g, '')}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                <Typography noWrap sx={{ maxWidth: '200px' }}>
+                                                    {flashcard.question}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Box>
                     </Paper>
                 </Grid>
             </Grid>

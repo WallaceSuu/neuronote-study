@@ -37,7 +37,7 @@ def generate_summary_and_title(pdf):
         model="gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that summarizes documents and provides a list of key points on the given document's main topic."},
-            {"role": "user", "content": f"Please summarize the following document and provide key points:\n\n{pdf_text}"}
+            {"role": "user", "content": f"Please summarize the following document and provide key points:\n\n{pdf_text}, feel free to add your own notes to the text when needed. Also feel free to add emojis to the text when needed for better readability and comprehension."}
         ],
         max_tokens=1000,
         temperature=0.7
@@ -47,7 +47,7 @@ def generate_summary_and_title(pdf):
         model="gpt-4o-mini-2024-07-18",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that generates titles for documents."},
-            {"role": "user", "content": f"Please generate a title for the following document:\n\n{pdf_text}"}
+            {"role": "user", "content": f"Please generate a title for the following document:\n\n{pdf_text}, please generate a title that sums up the main topic of the document and that is a plain string of text with no headings or other formatting."}
         ],
         max_tokens=30,
         temperature=1.2

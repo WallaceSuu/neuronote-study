@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   List,
@@ -12,9 +12,32 @@ import {
   useTheme,
 } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
+import { API_ENDPOINTS, axiosConfig } from "../config";
+import axios from 'axios';
 
-const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle }) => {
+const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle, refreshTrigger }) => {
   const theme = useTheme();
+
+  const [flashcards, setFlashcards] = useState([]);
+
+  const fetchFlashcards = async () => {
+    try {
+      const response = await axios.get(`${API_ENDPOINTS.GET_FLASHCARDS}`, axiosConfig);
+      setFlashcards(response.data.flashcards || []);
+    } catch (error) {
+      console.error('Error fetching flashcards:', error);
+      setFlashcards([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchFlashcards();
+  }, [refreshTrigger]);
+
+  const calculateFlashcardCount = useCallback((note) => {
+    return flashcards.filter((flashcard) => flashcard.note === note.note_id).length;
+  }, [flashcards]);
+
   const formatBoldText = (text) => {
     if (!text) return "";
     const cleanText = text.trim().replace(/^\"|\"$/g, '');
@@ -117,7 +140,7 @@ const FlashcardSidebar = ({ notes, selectedNote, onNoteSelect, isOpen, onToggle 
                           sx={{ color: theme.palette.text.secondary }}
                           variant="body2"
                         >
-                          {note.flashcards?.length || 0} cards
+                          {calculateFlashcardCount(note)} cards
                         </Typography>
                       }
                     />

@@ -267,7 +267,8 @@ class getFlashcardsView(APIView):
                     'title': flashcard_obj.flashcard_title, 
                     'question': flashcard_obj.flashcard_question,
                     'answers': formatted_answers,
-                    'created_at': flashcard_obj.created_at
+                    'created_at': flashcard_obj.created_at,
+                    'note': flashcard_obj.note.id
                 })
 
             return Response({

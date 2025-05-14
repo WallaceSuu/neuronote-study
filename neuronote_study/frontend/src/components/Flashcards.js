@@ -25,6 +25,7 @@ const Flashcards = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -83,6 +84,7 @@ const Flashcards = () => {
         );
         if (response.data.flashcard) {
           setFlashcards(prev => [...prev, response.data.flashcard]);
+          setRefreshTrigger(prev => prev + 1);
         }
       } catch (err) {
         console.error("Error generating new flashcard:", err);
@@ -113,6 +115,7 @@ const Flashcards = () => {
       if (response.data.flashcard) {
         setFlashcards([response.data.flashcard]);
         setCurrentCardIndex(0);
+        setRefreshTrigger(prev => prev + 1);
       }
     } catch (err) {
       console.error("Error generating flashcards:", err);
@@ -304,6 +307,7 @@ const Flashcards = () => {
         onNoteSelect={setSelectedNote}
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        refreshTrigger={refreshTrigger}
       />
       
       <Box
