@@ -60,3 +60,20 @@ class ChatMessageAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
     list_per_page = 25
+
+@admin.register(notebook_page)
+class NotebookPageAdmin(admin.ModelAdmin):
+    list_display = ('page_title', 'page_number', 'user', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('page_title',)
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+    list_per_page = 25
+
+@admin.register(notebook_note)
+class NotebookNoteAdmin(admin.ModelAdmin):
+    list_display = ('notebook_page', 'note', 'text', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('notebook_page', 'note', 'text')
+    readonly_fields = ('created_at',)
+

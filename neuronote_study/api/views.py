@@ -5,7 +5,7 @@ from rest_framework import status
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
-from .models import uploadPDF, User, note, flashcard
+from .models import uploadPDF, User, note, flashcard, notebook_page, notebook_note
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from openAI_api.views import ProcessPDFsView
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
@@ -190,6 +190,86 @@ class LoginView(APIView):
             return Response(
                 {"error": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
+            )
+
+class createNotebookNoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        try:
+            # Extract and validate data
+            page_number = request.data.get('page_number')
+            note_id = request.data.get('note')
+            text = request.data.get('text')
+            sidebar = request.data.get('sidebar', True)
+
+            # Validate required fields
+            missing_fields = []
+            if page_number is None:
+                missing_fields.append('page_number')
+            if note_id is None:
+                missing_fields.append('note')
+            if not text:
+                missing_fields.append('text')
+
+            if missing_fields:
+                return Response(
+                    {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate data types
+            try:
+                page_number = int(page_number)
+                note_id = int(note_id)
+            except (TypeError, ValueError):
+                return Response(
+                    {"error": "page_number and note must be valid integers"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate text
+            if not isinstance(text, str) or not text.strip():
+                return Response(
+                    {"error": "text must be a non-empty string"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get or create the notebook page
+            notebook_page_obj, created = notebook_page.objects.get_or_create(
+                user=user,
+                page_number=page_number,
+                defaults={'page_title': f'Page {page_number}'}
+            )
+
+            # Get the note object
+            try:
+                note_obj = note.objects.get(id=note_id, user=user)
+            except note.DoesNotExist:
+                return Response(
+                    {"error": f"Note with ID {note_id} not found or does not belong to user"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Create the notebook note
+            notebook_note_obj = notebook_note.objects.create(
+                notebook_page=notebook_page_obj,
+                note=note_obj,
+                text=text.strip(),
+                sidebar=sidebar
+            )
+
+            return Response({
+                "message": "Notebook note created successfully",
+                "notebook_note_id": notebook_note_obj.id,
+                "page_number": page_number
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {"error": f"Error creating notebook note: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class getSidebarNotebookNotesView(APIView):

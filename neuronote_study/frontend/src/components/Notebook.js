@@ -19,7 +19,7 @@ const Notebook = () => {
 
     const fetchNotebookNotes = async () => {
         try {
-            const response = await axios.get(API_ENDPOINTS.SIDEBAR_NOTEBOOK_NOTES(currentPage));
+            const response = await axios.get(API_ENDPOINTS.NOTEBOOK_NOTES(currentPage));
             setNotes(response.data);
             setIsLoading(false);
         } catch (error) {

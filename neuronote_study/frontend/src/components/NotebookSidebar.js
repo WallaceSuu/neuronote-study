@@ -29,3 +29,5 @@ const NotebookSidebar = () => {
         </Paper>
     )
 }
+
+export default NotebookSidebar;
