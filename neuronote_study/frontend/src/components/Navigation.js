@@ -120,7 +120,8 @@ const GlowIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const Navigation = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const { isDarkMode, toggleTheme } = useThemeContext();
   const theme = useTheme();
@@ -132,6 +133,7 @@ const Navigation = () => {
     const fetchUserInfo = async () => {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) {
+        setIsLoggedIn(false);
         setUsername('');
         return;
       }
@@ -143,6 +145,7 @@ const Navigation = () => {
           }
         });
         setUsername(response.data.username);
+        setIsLoggedIn(true);
       } catch (error) {
         console.error('Error fetching user info:', error);
         if (error.response?.status === 401) {
@@ -166,6 +169,10 @@ const Navigation = () => {
 
   const handleProfileClick = () => {
     window.location.href = '/profile';
+  };
+
+  const handleLogin = () => {
+    window.location.href = '/login';
   };
 
   const handleLogout = () => {
@@ -296,9 +303,6 @@ const Navigation = () => {
             <GlowIconButton color="inherit" onClick={toggleTheme}>
               {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </GlowIconButton>
-            <GlowIconButton color="inherit">
-              <NotificationsIcon />
-            </GlowIconButton>
             <GlowIconButton
               onClick={handleMenu}
               color="inherit"
@@ -333,10 +337,16 @@ const Navigation = () => {
                 },
               }}
             >
-              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
-              <Divider sx={{ borderColor: theme.palette.divider }} />
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              {isLoggedIn ? (
+                <>
+                  <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+                  <MenuItem onClick={handleClose}>My account</MenuItem>
+                  <Divider sx={{ borderColor: theme.palette.divider }} />
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </>
+              ) : (
+                <MenuItem onClick={handleLogin}>Login</MenuItem>
+              )}
             </Menu>
           </Box>
         </Toolbar>
