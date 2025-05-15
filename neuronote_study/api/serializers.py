@@ -25,4 +25,8 @@ class chat_messageSerializer(serializers.ModelSerializer):
     class Meta:
         model = chat_message
         fields = ['id', 'message', 'created_at', 'role', 'user', 'note']
-    
+
+class NotebookNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = notebook_note
+        fields = ['id', 'note', 'text', 'created_at', 'location_x', 'location_y', 'location_z', 'sidebar']

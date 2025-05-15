@@ -94,7 +94,7 @@ const SubmitPDF = () => {
     formData.append("pdf_file", file);
 
     try {
-      const response = await axios.post(API_ENDPOINTS.UPLOAD_PDF, formData, {
+      await axios.post(API_ENDPOINTS.UPLOAD_PDF, formData, {
         ...axiosConfig,
         headers: {
           ...axiosConfig.headers,
@@ -102,10 +102,7 @@ const SubmitPDF = () => {
           "Authorization": `Token ${token}`
         },
       });
-      alert("PDF uploaded successfully");
-      window.location.href = "/notes";
-      setFile(null);
-      setIsLoading(false);
+      navigate("/notes");
     } catch (error) {
       console.error("Error:", error);
       if (error.response && error.response.status === 401) {

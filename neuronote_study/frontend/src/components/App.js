@@ -11,6 +11,7 @@ import RegisterPage from "./RegisterPage";
 import Flashcards from "./Flashcards";
 import Profile from "./Profile";
 import ChatPage from "./ChatPage";
+import Notebook from "./Notebook";
 import { Box } from "@mui/material";
 import { ThemeProvider } from "../context/ThemeContext";
 
@@ -36,6 +37,7 @@ const App = () => {
               <Route path="/notes" element={<Notes />} />
               <Route path="/flashcards" element={<Flashcards />} />
               <Route path="/chat" element={<ChatPage />} />
+              <Route path="/notebook" element={<Notebook />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

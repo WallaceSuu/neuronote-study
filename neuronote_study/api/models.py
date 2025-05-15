@@ -85,3 +85,24 @@ class chat_message(models.Model):
     role = models.CharField(max_length=255, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_chat_messages')
     note = models.ForeignKey(note, on_delete=models.CASCADE, related_name='note_chat_messages', db_constraint=False)
+
+class notebook_page(models.Model):
+    page_title = models.CharField(max_length=255, null=True, blank=True)
+    page_number = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_notebooks')
+
+class notebook_note(models.Model):
+    notebook_page = models.ForeignKey(notebook_page, on_delete=models.CASCADE, related_name='notebook_notes')
+    note = models.ForeignKey(note, on_delete=models.CASCADE, related_name='note_notebook_notes', db_constraint=False)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    location_x = models.IntegerField(null=True, default=0, blank=True)
+    location_y = models.IntegerField(null=True, default=0, blank=True)
+    location_z = models.IntegerField(null=True, default=0, blank=True)
+    sidebar = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Notebook Note'
+        verbose_name_plural = 'Notebook Notes'
+

@@ -27,4 +27,6 @@ def profile(request):
 def chat(request):
     return render(request, 'frontend/index.html')
 
+def notebook(request):
+    return render(request, 'frontend/index.html')
 

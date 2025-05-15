@@ -192,5 +192,20 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+class getSidebarNotebookNotesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        notebook_notes = notebook_note.objects.filter(user=user, sidebar=True, notebook_page=page_number)
+        serializer = NotebookNoteSerializer(notebook_notes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-    
+class getNotebookNotesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        notebook_notes = notebook_note.objects.filter(user=user, sidebar=False, notebook_page=page_number)
+        serializer = NotebookNoteSerializer(notebook_notes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
