@@ -20,5 +20,9 @@ class flashcardSerializer(serializers.ModelSerializer):
     class Meta:
         model = flashcard
         fields = '__all__'
-        
+
+class chat_messageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = chat_message
+        fields = ['id', 'message', 'created_at', 'role', 'user', 'note']
     

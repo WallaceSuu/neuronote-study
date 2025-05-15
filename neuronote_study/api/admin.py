@@ -51,4 +51,12 @@ class FlashcardAnswerAdmin(admin.ModelAdmin):
     list_display = ('flashcard_answer', 'answer_text', 'is_correct')
     list_filter = ('is_correct',)
     search_fields = ('flashcard_answer', 'answer_text')
-    
+
+@admin.register(chat_message)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('message', 'user', 'role', 'note', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('message',)
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+    list_per_page = 25

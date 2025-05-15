@@ -281,3 +281,93 @@ class getFlashcardsView(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class getMessagesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, note_id):
+        try:
+            messages = chat_message.objects.filter(note_id=note_id).order_by('created_at')
+            messages_data = [{
+                'id': message.id,
+                'message': message.message,
+                'role': message.role,
+                'created_at': message.created_at,
+                'user_id': message.user.id
+            } for message in messages]
+            
+            return Response({
+                'status': 'success',
+                'messages': messages_data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class sendMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            message = request.data.get('message')
+            note_id = request.data.get('note_id')
+
+            if not note_id:
+                return Response({
+                    'status': 'error',
+                    'message': 'Note ID is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            note_obj = note.objects.get(id=note_id)
+
+            # Get previous messages, excluding any with null roles
+            previous_messages = chat_message.objects.filter(
+                note_id=note_id,
+                role__isnull=False
+            ).order_by('created_at')
+            
+            old_messages = [{
+                'role': msg.role,
+                'content': msg.message
+            } for msg in previous_messages]
+
+            # Add the new user message to the database
+            new_message = chat_message.objects.create(
+                message=message,
+                role="user",
+                user=request.user,
+                note=note_obj
+            )
+            new_message.save()
+
+            # Add the user message to the conversation history
+            old_messages.append({
+                'role': 'user',
+                'content': message
+            })
+
+            # Get the response from OpenAI
+            assistant_message = generate_assistant_chat_message(old_messages, message)
+
+            # Add the assistant message to the database
+            assistant_message_obj = chat_message.objects.create(
+                message=assistant_message,
+                role="assistant",
+                user=request.user,
+                note=note_obj
+            )
+            assistant_message_obj.save()
+
+            return Response({
+                'status': 'success',
+                'message': assistant_message
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

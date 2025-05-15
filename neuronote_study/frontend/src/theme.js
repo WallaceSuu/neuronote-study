@@ -1,6 +1,5 @@
 import { createTheme } from "@mui/material/styles";
 
-// Create a modern, futuristic theme with dark background and bright accents
 const theme = createTheme({
   palette: {
     mode: "dark",

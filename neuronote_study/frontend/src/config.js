@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   GET_USER_PDFS: `${API_BASE_URL}/api/get-user-pdfs/`,
   LOGOUT: `${API_BASE_URL}/api/logout/`,
   USER: `${API_BASE_URL}/api/user/`,
+  GET_MESSAGES: `${API_BASE_URL}/openai/get-messages/`,
+  SEND_MESSAGE: `${API_BASE_URL}/openai/send-message/`,
 };
 
 export const getCSRFToken = () => {

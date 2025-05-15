@@ -78,4 +78,10 @@ class flashcard_answer(models.Model):
     flashcard_answer = models.ForeignKey(flashcard, on_delete=models.CASCADE, related_name='flashcard_answers')
     answer_text = models.TextField()
     is_correct = models.BooleanField(default=False)
-    
+
+class chat_message(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=255, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_chat_messages')
+    note = models.ForeignKey(note, on_delete=models.CASCADE, related_name='note_chat_messages', db_constraint=False)

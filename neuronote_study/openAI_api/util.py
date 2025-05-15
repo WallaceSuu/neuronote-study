@@ -121,6 +121,34 @@ def generate_flashcards(note_text):
         "flashcard_answers": flashcard_answers.choices[0].message.content
     }
 
+def get_previous_messages(note_id):
+    fetched_results = chat_message.objects.filter(note_id=note_id).order_by('created_at')
+
+    old_messages = []
+    for message in fetched_results:
+        old_messages.append({
+            "role": message.role,
+            "content": message.message
+        })
+
+    return old_messages
+
+def generate_assistant_chat_message(old_messages, new_message):
+    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    full_messages = old_messages + [{"role": "user", "content": new_message}]
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini-2024-07-18",
+        messages=full_messages,
+        max_tokens=1000,
+        temperature=0.7
+    )
+
+    return response.choices[0].message.content
+
+
+
     
     
 
