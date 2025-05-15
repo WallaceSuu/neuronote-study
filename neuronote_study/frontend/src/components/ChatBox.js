@@ -49,7 +49,8 @@ const ChatBox = ({ selectedNote }) => {
             const token = localStorage.getItem('authToken');
             const response = await axios.post(API_ENDPOINTS.SEND_MESSAGE, {
                 message: message,
-                note_id: selectedNote.note_id
+                note_id: selectedNote.note_id,
+                note_text: selectedNote.note_text
             }, {
                 headers: {
                     'Authorization': `Token ${token}`

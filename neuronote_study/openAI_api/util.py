@@ -133,10 +133,23 @@ def get_previous_messages(note_id):
 
     return old_messages
 
-def generate_assistant_chat_message(old_messages, new_message):
+def generate_assistant_chat_message(old_messages, new_message, note_text):
     client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    full_messages = old_messages + [{"role": "user", "content": new_message}]
+    # Create a system message that includes the note text as context
+    system_message = {
+        "role": "system",
+        "content": f"""You are a helpful assistant discussing the following note:
+        
+        {note_text}
+
+        Please use this information to provide relevant and contextual responses. 
+        If the user's question is not related to the note content, you can still help but make it clear that you're going beyond the note's scope.
+        """
+    }
+
+    # Combine system message with conversation history
+    full_messages = [system_message] + old_messages + [{"role": "user", "content": new_message}]
 
     response = client.chat.completions.create(
         model="gpt-4o-mini-2024-07-18",

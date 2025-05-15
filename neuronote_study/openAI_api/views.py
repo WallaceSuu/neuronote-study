@@ -314,6 +314,7 @@ class sendMessageView(APIView):
         try:
             message = request.data.get('message')
             note_id = request.data.get('note_id')
+            note_text = request.data.get('note_text')
 
             if not note_id:
                 return Response({
@@ -350,7 +351,7 @@ class sendMessageView(APIView):
             })
 
             # Get the response from OpenAI
-            assistant_message = generate_assistant_chat_message(old_messages, message)
+            assistant_message = generate_assistant_chat_message(old_messages, message, note_text)
 
             # Add the assistant message to the database
             assistant_message_obj = chat_message.objects.create(
