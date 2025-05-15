@@ -19,7 +19,7 @@ const SubmitPDF = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
   const dropAreaRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,17 +34,13 @@ const SubmitPDF = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    const pdfFiles = droppedFiles.filter(
-      (file) => file.type === "application/pdf"
-    );
-
-    if (pdfFiles.length === 0) {
-      alert("Please upload PDF files only.");
+    const droppedFile = e.dataTransfer.files[0];
+    if (!droppedFile || droppedFile.type !== "application/pdf") {
+      alert("Please upload a PDF file only.");
       return;
     }
 
-    setFiles((prevFiles) => [...prevFiles, ...pdfFiles]);
+    setFile(droppedFile);
   };
 
   // Handle drag over
@@ -61,29 +57,28 @@ const SubmitPDF = () => {
 
   // Handle file selection via button
   const handleFileSelect = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const pdfFiles = selectedFiles.filter(
-      (file) => file.type === "application/pdf"
-    );
-
-    if (pdfFiles.length === 0) {
-      alert("Please upload PDF files only.");
+    const selectedFile = e.target.files[0];
+    if (!selectedFile || selectedFile.type !== "application/pdf") {
+      alert("Please upload a PDF file only.");
       return;
     }
 
-    setFiles((prevFiles) => [...prevFiles, ...pdfFiles]);
+    setFile(selectedFile);
   };
 
   // Handle file removal
-  const handleRemoveFile = (index) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  const handleRemoveFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Handle file submission
   const handleSubmit = async () => {
     setIsLoading(true);
-    if (files.length === 0) {
-      alert("Please upload at least one PDF file.");
+    if (!file) {
+      alert("Please upload a PDF file.");
       setIsLoading(false);
       return;
     }
@@ -95,23 +90,10 @@ const SubmitPDF = () => {
       return;
     }
 
-    // Creating a new formdata object to send the files to the server
     const formData = new FormData();
+    formData.append("pdf_file", file);
 
-    // Appending each file submitted to the formdata object
-    files.forEach((file) => {
-      console.log("Adding file to FormData:", file.name);
-      formData.append("pdf_file", file);
-    });
-
-    // Debug: Check what's in the FormData
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
-
-    // Sending the formdata object to the server via axios post request
     try {
-      console.log("Sending request to:", API_ENDPOINTS.UPLOAD_PDF);
       const response = await axios.post(API_ENDPOINTS.UPLOAD_PDF, formData, {
         ...axiosConfig,
         headers: {
@@ -120,10 +102,9 @@ const SubmitPDF = () => {
           "Authorization": `Token ${token}`
         },
       });
-      console.log(response.data);
       alert("PDF uploaded successfully");
       window.location.href = "/notes";
-      setFiles([]); // Clear the files after successful upload
+      setFile(null);
       setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);
@@ -212,7 +193,7 @@ const SubmitPDF = () => {
             color: "#aaa",
           }}
         >
-          Upload your lecture slide PDFs for analysis
+          Upload your lecture slide PDF for analysis
         </Typography>
 
         <Paper
@@ -227,6 +208,8 @@ const SubmitPDF = () => {
             flexDirection: "column",
             alignItems: "center",
             transition: "all 0.2s ease",
+            minHeight: "250px",
+            justifyContent: "center",
             "&:hover": {
               backgroundColor: "rgba(255, 255, 255, 0.15)",
               boxShadow: "0 0 15px rgba(33, 150, 243, 0.2)",
@@ -236,148 +219,113 @@ const SubmitPDF = () => {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
-          <CloudUploadIcon
-            sx={{
-              fontSize: 64,
-              mb: 2,
-              opacity: 0.9,
-              color: theme.palette.primary.main,
-            }}
-          />
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Drag & Drop PDF Files Here
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ mb: 3, textAlign: "center", color: "#aaa" }}
-          >
-            or
-          </Typography>
-          <Button
-            variant="contained"
-            component="label"
-            sx={{
-              backgroundColor: theme.palette.primary.main,
-              "&:hover": {
-                backgroundColor: theme.palette.primary.dark,
-                transform: "translateY(-2px)",
-                boxShadow: "0 5px 15px rgba(33, 150, 243, 0.3)",
-              },
-              transition: "all 0.2s",
-              boxShadow: "0 3px 8px rgba(33, 150, 243, 0.2)",
-            }}
-          >
-            Select PDF Files
-            <input
-              ref={fileInputRef}
-              type="file"
-              hidden
-              accept=".pdf"
-              multiple
-              onChange={handleFileSelect}
-              name="pdf_file"
-            />
-          </Button>
+          {!file ? (
+            <>
+              <CloudUploadIcon
+                sx={{
+                  fontSize: 64,
+                  mb: 2,
+                  opacity: 0.9,
+                  color: theme.palette.primary.main,
+                }}
+              />
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Drag & Drop PDF File Here
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ mb: 3, textAlign: "center", color: "#aaa" }}
+              >
+                or
+              </Typography>
+              <Button
+                variant="contained"
+                component="label"
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: theme.palette.primary.dark,
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 5px 15px rgba(33, 150, 243, 0.3)",
+                  },
+                  transition: "all 0.2s",
+                  boxShadow: "0 3px 8px rgba(33, 150, 243, 0.2)",
+                }}
+              >
+                Select PDF File
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  hidden
+                  accept=".pdf"
+                  onChange={handleFileSelect}
+                  name="pdf_file"
+                />
+              </Button>
+            </>
+          ) : (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <InsertDriveFileIcon
+                sx={{ fontSize: 32, color: theme.palette.primary.light }}
+              />
+              <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>
+                {file.name}
+              </Typography>
+              <Button
+                size="small"
+                onClick={handleRemoveFile}
+                sx={{
+                  color: theme.palette.error.main,
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  },
+                }}
+              >
+                Remove
+              </Button>
+            </Box>
+          )}
         </Paper>
 
-        {files.length > 0 && (
-          <Paper
-            sx={{
-              p: 3,
-              backgroundColor: "rgba(255, 255, 255, 0.08)",
-              backdropFilter: "blur(10px)",
-              borderRadius: 2,
-              border: "1px solid rgba(255, 255, 255, 0.05)",
-              maxHeight: "400px",
-              overflow: "auto",
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Uploaded Files ({files.length})
-            </Typography>
-            <Stack spacing={1}>
-              {files.map((file, index) => (
-                <Paper
-                  key={index}
-                  sx={{
-                    p: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    backgroundColor: "rgba(255, 255, 255, 0.05)",
-                    borderRadius: 1,
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.08)",
-                    },
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <InsertDriveFileIcon
-                      sx={{ mr: 1, color: theme.palette.primary.light }}
-                    />
-                    <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                      {file.name}
-                    </Typography>
-                  </Box>
-                  <Button
-                    size="small"
-                    onClick={() => handleRemoveFile(index)}
+        {file && (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              sx={{
+                backgroundColor: "#1565c0",
+                "&:hover": {
+                  backgroundColor: "#0d47a1",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 5px 15px rgba(21, 101, 192, 0.3)",
+                },
+                transition: "all 0.2s",
+                boxShadow: "0 3px 8px rgba(21, 101, 192, 0.2)",
+                minWidth: "150px",
+                position: "relative",
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <CircularProgress
+                    size={24}
                     sx={{
                       color: "white",
-                      "&:hover": {
-                        color: theme.palette.secondary.main,
-                        background: "rgba(255, 255, 255, 0.05)",
-                      },
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      marginTop: "-12px",
+                      marginLeft: "-12px",
                     }}
-                  >
-                    Remove
-                  </Button>
-                </Paper>
-              ))}
-            </Stack>
-            {files.length > 0 && (
-              <Box sx={{ mt: 2, textAlign: "center" }}>
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                  sx={{
-                    mt: 2,
-                    backgroundColor: theme.palette.secondary.main,
-                    "&:hover": {
-                      backgroundColor: theme.palette.secondary.dark,
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 5px 15px rgba(0, 188, 212, 0.3)",
-                    },
-                    transition: "all 0.2s",
-                    boxShadow: "0 3px 8px rgba(0, 188, 212, 0.2)",
-                    minWidth: "150px",
-                    position: "relative",
-                  }}
-                >
-                  {isLoading ? (
-                    <>
-                      <CircularProgress
-                        size={24}
-                        sx={{
-                          color: "white",
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          marginTop: "-12px",
-                          marginLeft: "-12px",
-                        }}
-                      />
-                      <span style={{ visibility: "hidden" }}>Process Files</span>
-                    </>
-                  ) : (
-                    "Process Files"
-                  )}
-                </Button>
-              </Box>
-            )}
-          </Paper>
+                  />
+                  <span style={{ visibility: "hidden" }}>Process File</span>
+                </>
+              ) : (
+                "Process File"
+              )}
+            </Button>
+          </Box>
         )}
       </Box>
     </Container>
