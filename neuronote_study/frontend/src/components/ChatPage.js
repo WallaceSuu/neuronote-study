@@ -4,6 +4,7 @@ import ChatSidebar from './ChatSidebar';
 import ChatBox from './ChatBox';
 import axios from 'axios';
 import { API_ENDPOINTS, axiosConfig } from '../config';
+import { useTheme } from '@mui/material/styles';
 
 const ChatPage = () => {
     const [selectedNote, setSelectedNote] = useState(null);
@@ -11,6 +12,7 @@ const ChatPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const theme = useTheme();
 
     useEffect(() => {
         const fetchNotes = async () => {
@@ -57,7 +59,7 @@ const ChatPage = () => {
                         {error}
                     </Typography>
                 ) : notes.length === 0 ? (
-                    <Typography sx={{ textAlign: 'center', mt: 4, color: 'rgba(255, 255, 255, 0.7)' }}>
+                    <Typography sx={{ textAlign: 'center', mt: 4, color: theme.palette.text.secondary }}>
                         No notes found. Upload a PDF to create your first note!
                     </Typography>
                 ) : (

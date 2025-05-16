@@ -122,15 +122,14 @@ const ChatBox = ({ selectedNote }) => {
             {/* Header */}
             <Box sx={{ 
                 p: 2, 
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                bgcolor: theme.palette.background.paper
+                borderBottom: `1px solid ${theme.palette.divider}`
             }}>
                 {selectedNote ? (
-                    <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
+                    <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.secondary }}>
                         Chatting about: {selectedNote.note_title}
                     </Typography>
                 ) : (
-                    <Typography variant="h6" sx={{ color: theme.palette.text.secondary }}>
+                    <Typography sx={{ textAlign: "center", color: theme.palette.text.secondary }}>
                         Please select a note from the sidebar to start chatting.
                     </Typography>
                 )}
