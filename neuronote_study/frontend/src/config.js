@@ -16,8 +16,8 @@ export const API_ENDPOINTS = {
   GET_MESSAGES: `${API_BASE_URL}/openai/get-messages/`,
   SEND_MESSAGE: `${API_BASE_URL}/openai/send-message/`,
   CREATE_NOTEBOOK_NOTE: `${API_BASE_URL}/api/create-notebook-note/`,
-  SIDEBAR_NOTEBOOK_NOTES: `${API_BASE_URL}/api/sidebar-notebook-notes/`,
-  NOTEBOOK_NOTES: `${API_BASE_URL}/api/notebook-notes/`,
+  SIDEBAR_NOTEBOOK_NOTES: `${API_BASE_URL}/api/sidebar-notebook-notes`,
+  NOTEBOOK_NOTES: `${API_BASE_URL}/api/notebook-notes`,
 };
 
 export const getCSRFToken = () => {

@@ -65,7 +65,7 @@ const Note = ({ selectedNote }) => {
         throw new Error('Invalid text content');
       }
 
-      const response = await axios.post(API_ENDPOINTS.CREATE_NOTEBOOK_NOTE, {
+      const response = await axios.post(`${API_ENDPOINTS.CREATE_NOTEBOOK_NOTE}`, {
         page_number: pageNumberInt,
         note: noteIdInt,
         text: text.trim(),

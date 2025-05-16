@@ -275,17 +275,67 @@ class createNotebookNoteView(APIView):
 class getSidebarNotebookNotesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, page_number):
         user = request.user
-        notebook_notes = notebook_note.objects.filter(user=user, sidebar=True, notebook_page=page_number)
-        serializer = NotebookNoteSerializer(notebook_notes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            try:
+                page_number = int(page_number)
+            except (TypeError, ValueError):
+                return Response(
+                    {"error": "page_number must be a valid integer"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get or create the notebook page
+            notebook_page_obj, created = notebook_page.objects.get_or_create(
+                user=user,
+                page_number=page_number,
+                defaults={'page_title': f'Page {page_number}'}
+            )
+
+            # Get the notebook notes
+            notebook_notes = notebook_note.objects.filter(
+                notebook_page=notebook_page_obj,
+                sidebar=True
+            )
+            serializer = NotebookNoteSerializer(notebook_notes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
 class getNotebookNotesView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def get(self, request, page_number):
         user = request.user
-        notebook_notes = notebook_note.objects.filter(user=user, sidebar=False, notebook_page=page_number)
-        serializer = NotebookNoteSerializer(notebook_notes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            try:
+                page_number = int(page_number)
+            except (TypeError, ValueError):
+                return Response(
+                    {"error": "page_number must be a valid integer"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get or create the notebook page
+            notebook_page_obj, created = notebook_page.objects.get_or_create(
+                user=user,
+                page_number=page_number,
+                defaults={'page_title': f'Page {page_number}'}
+            )
+
+            # Get the notebook notes
+            notebook_notes = notebook_note.objects.filter(
+                notebook_page=notebook_page_obj,
+                sidebar=False
+            )
+            serializer = NotebookNoteSerializer(notebook_notes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

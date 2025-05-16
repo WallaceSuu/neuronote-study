@@ -46,7 +46,6 @@ const NotebookNavigation = () => {
         >
           <ArrowBackIosNewIcon />
         </IconButton>
-
         <Typography
           variant="body1"
           sx={{
