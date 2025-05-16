@@ -15,6 +15,7 @@ const Notebook = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [draggedNote, setDraggedNote] = useState(null);
     const theme = useTheme();
 
     const fetchNotebookNotes = async () => {
@@ -40,6 +41,76 @@ const Notebook = () => {
         fetchNotebookNotes();
     }, [currentPage, refreshTrigger]);
 
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        const noteData = JSON.parse(e.dataTransfer.getData('application/json'));
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        try {
+            // If it's a note being moved within the notebook
+            if (draggedNote) {
+                const response = await axios.patch(`${API_ENDPOINTS.UPDATE_NOTEBOOK_NOTE}/${draggedNote.id}/`, {
+                    location_x: x,
+                    location_y: y
+                }, {
+                    headers: {
+                        'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                setNotes(notes.map(note => 
+                    note.id === draggedNote.id ? { ...note, location_x: x, location_y: y } : note
+                ));
+                setDraggedNote(null);
+                return;
+            }
+
+            // If it's a new note from the sidebar
+            const response = await axios.post(API_ENDPOINTS.CREATE_NOTEBOOK_NOTE, {
+                page_number: currentPage,
+                note: noteData.note,
+                text: noteData.text,
+                location_x: x,
+                location_y: y,
+                location_z: notes.length + 1,
+                sidebar: false
+            }, {
+                headers: {
+                    'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            // Delete the original note from the sidebar
+            await axios.delete(`${API_ENDPOINTS.UPDATE_NOTEBOOK_NOTE}/${noteData.id}/`, {
+                headers: {
+                    'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            setNotes([...notes, response.data]);
+            setRefreshTrigger(prev => prev + 1); // This will refresh both the notebook and sidebar
+        } catch (error) {
+            console.error('Error handling note drop:', error);
+            setError('Failed to update note position');
+        }
+    };
+
+    const handleNoteDragStart = (e, note) => {
+        setDraggedNote(note);
+        e.dataTransfer.setData('application/json', JSON.stringify(note));
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
     return (
         <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
             <NotebookNavigation 
@@ -47,16 +118,31 @@ const Notebook = () => {
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
             />
-            <NotebookSidebar />
+            <NotebookSidebar refreshTrigger={refreshTrigger} />
             
             {/* Main content area */}
             <Box
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 sx={{
                     position: 'relative',
-                    width: '100%',
-                    height: 'calc(100vh - 64px)', // Adjust based on your header height
+                    marginLeft: '250px', // Add margin to account for left sidebar
+                    width: 'calc(100% - 250px)',
+                    height: 'calc(100vh - 64px)',
                     overflow: 'hidden',
                     padding: '20px',
+                    cursor: 'default',
+                    backgroundColor: theme.palette.background.default,
+                    backgroundImage: `
+                        linear-gradient(${theme.palette.divider} 1px, transparent 1px),
+                        linear-gradient(90deg, ${theme.palette.divider} 1px, transparent 1px)
+                    `,
+                    backgroundSize: '20px 20px',
+                    border: `2px dashed ${theme.palette.divider}`,
+                    borderRadius: '8px',
+                    '&:hover': {
+                        backgroundColor: theme.palette.action.hover,
+                    }
                 }}
             >
                 {isLoading ? (
@@ -71,6 +157,8 @@ const Notebook = () => {
                     notes.map((note) => (
                         <Paper
                             key={note.id}
+                            draggable
+                            onDragStart={(e) => handleNoteDragStart(e, note)}
                             elevation={3}
                             sx={{
                                 position: 'absolute',
@@ -88,6 +176,9 @@ const Notebook = () => {
                                     transform: 'scale(1.02)',
                                     transition: 'all 0.2s ease-in-out',
                                 },
+                                '&:active': {
+                                    cursor: 'grabbing',
+                                }
                             }}
                         >
                             <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>

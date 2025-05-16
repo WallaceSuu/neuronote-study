@@ -14,4 +14,5 @@ urlpatterns = [
     path('create-notebook-note/', createNotebookNoteView.as_view(), name='create-notebook-note'),
     path('sidebar-notebook-notes/<int:page_number>/', getSidebarNotebookNotesView.as_view(), name='sidebar-notebook-notes'),
     path('notebook-notes/<int:page_number>/', getNotebookNotesView.as_view(), name='notebook-notes'),
+    path('update-notebook-note/<int:note_id>/', updateNotebookNoteView.as_view(), name='update-notebook-note'),
 ]

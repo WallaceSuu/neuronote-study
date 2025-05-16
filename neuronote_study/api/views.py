@@ -305,7 +305,7 @@ class getSidebarNotebookNotesView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
 class getNotebookNotesView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -339,3 +339,63 @@ class getNotebookNotesView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class updateNotebookNoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, note_id):
+        user = request.user
+        try:
+            # Get the notebook note and verify ownership through notebook_page
+            notebook_note_obj = notebook_note.objects.get(
+                id=note_id,
+                notebook_page__user=user  # Filter through the notebook_page relationship
+            )
+            
+            # Update sidebar status if provided
+            if 'sidebar' in request.data:
+                notebook_note_obj.sidebar = request.data.get('sidebar')
+            
+            # Update location if provided
+            if 'location_x' in request.data:
+                notebook_note_obj.location_x = request.data.get('location_x')
+            if 'location_y' in request.data:
+                notebook_note_obj.location_y = request.data.get('location_y')
+            if 'location_z' in request.data:
+                notebook_note_obj.location_z = request.data.get('location_z')
+            
+            # Update text if provided
+            if 'text' in request.data:
+                notebook_note_obj.text = request.data.get('text')
+            
+            notebook_note_obj.save()
+            
+            return Response({
+                'id': notebook_note_obj.id,
+                'note': notebook_note_obj.note.id,
+                'text': notebook_note_obj.text,
+                'location_x': notebook_note_obj.location_x,
+                'location_y': notebook_note_obj.location_y,
+                'location_z': notebook_note_obj.location_z,
+                'sidebar': notebook_note_obj.sidebar
+            })
+        except notebook_note.DoesNotExist:
+            return Response({'error': 'Notebook note not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+    def delete(self, request, note_id):
+        user = request.user
+        try:
+            # Get the notebook note and verify ownership through notebook_page
+            notebook_note_obj = notebook_note.objects.get(
+                id=note_id,
+                notebook_page__user=user
+            )
+            notebook_note_obj.delete()
+            return Response({'message': 'Notebook note deleted successfully'}, status=200)
+        except notebook_note.DoesNotExist:
+            return Response({'error': 'Notebook note not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+

@@ -72,7 +72,7 @@ class NotebookPageAdmin(admin.ModelAdmin):
 
 @admin.register(notebook_note)
 class NotebookNoteAdmin(admin.ModelAdmin):
-    list_display = ('notebook_page', 'note', 'text', 'created_at')
+    list_display = ('notebook_page', 'note', 'text', 'created_at', 'sidebar')
     list_filter = ('created_at',)
     search_fields = ('notebook_page', 'note', 'text')
     readonly_fields = ('created_at',)

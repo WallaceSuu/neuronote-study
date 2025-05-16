@@ -3,7 +3,7 @@ import { Box, Typography, Paper, List, ListItem, useTheme } from '@mui/material'
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 
-const NotebookSidebar = () => {
+const NotebookSidebar = ({ refreshTrigger }) => {
     const theme = useTheme();
     const [notebookNotes, setNotebookNotes] = useState([]);
     const [pageNumber, setPageNumber] = useState(1);
@@ -24,23 +24,43 @@ const NotebookSidebar = () => {
             }
         };
         fetchSidebarNotebookNotes();
-    }, [pageNumber]);
+    }, [pageNumber, refreshTrigger]);
+
+    const handleDragStart = (e, note) => {
+        e.dataTransfer.setData('application/json', JSON.stringify(note));
+        e.dataTransfer.effectAllowed = 'move';
+    };
 
     return (
         <Paper 
             elevation={3} 
             sx={{ 
-                p: 2, 
-                width: '250px', 
-                height: '100%',
+                position: 'fixed',
+                left: 0,
+                top: '64px',
+                width: '250px',
+                height: 'calc(100vh - 64px)',
                 backgroundColor: theme.palette.background.default,
-                overflow: 'auto'
+                overflow: 'auto',
+                zIndex: 1000,
+                borderRight: `1px solid ${theme.palette.divider}`,
+                transition: 'transform 0.3s ease-in-out',
+                '&:hover': {
+                    boxShadow: theme.shadows[8],
+                }
             }}
         >
-            <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.primary }}>
+            <Typography variant="h6" sx={{ 
+                p: 2, 
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                position: 'sticky',
+                top: 0,
+                zIndex: 1
+            }}>
                 Notebook Notes
             </Typography>
-            <List sx={{ width: '100%', p: 0 }}>
+            <List sx={{ width: '100%', p: 2 }}>
                 {notebookNotes.map((note) => (
                     <ListItem 
                         key={note.id} 
@@ -51,15 +71,21 @@ const NotebookSidebar = () => {
                         }}
                     >
                         <Paper
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, note)}
                             elevation={2}
                             sx={{
                                 p: 2,
                                 backgroundColor: '#fff9c4', // Light yellow color for sticky note
                                 transform: 'rotate(-1deg)', // Slight rotation for sticky note effect
                                 transition: 'transform 0.2s ease-in-out',
+                                cursor: 'grab',
                                 '&:hover': {
                                     transform: 'rotate(0deg) scale(1.02)',
                                     boxShadow: theme.shadows[4],
+                                },
+                                '&:active': {
+                                    cursor: 'grabbing',
                                 },
                                 position: 'relative',
                                 '&::before': {

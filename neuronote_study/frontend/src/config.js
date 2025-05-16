@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   CREATE_NOTEBOOK_NOTE: `${API_BASE_URL}/api/create-notebook-note/`,
   SIDEBAR_NOTEBOOK_NOTES: `${API_BASE_URL}/api/sidebar-notebook-notes`,
   NOTEBOOK_NOTES: `${API_BASE_URL}/api/notebook-notes`,
+  UPDATE_NOTEBOOK_NOTE: `${API_BASE_URL}/api/update-notebook-note`,
 };
 
 export const getCSRFToken = () => {
