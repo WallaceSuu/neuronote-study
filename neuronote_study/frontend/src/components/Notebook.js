@@ -111,6 +111,22 @@ const Notebook = () => {
         e.dataTransfer.effectAllowed = 'move';
     };
 
+    const handleDeleteNote = async (noteId) => {
+        try {
+            await axios.delete(`${API_ENDPOINTS.UPDATE_NOTEBOOK_NOTE}/${noteId}/`, {
+                headers: {
+                    'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            setNotes(notes.filter(note => note.id !== noteId));
+            setRefreshTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            setError('Failed to delete note');
+        }
+    };
+
     return (
         <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
             <NotebookNavigation 
@@ -139,10 +155,7 @@ const Notebook = () => {
                     `,
                     backgroundSize: '20px 20px',
                     border: `2px dashed ${theme.palette.divider}`,
-                    borderRadius: '8px',
-                    '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
-                    }
+                    borderRadius: '8px'
                 }}
             >
                 {isLoading ? (
@@ -181,9 +194,47 @@ const Notebook = () => {
                                 }
                             }}
                         >
-                            <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>
-                                {note.text}
-                            </Typography>
+                            <Box sx={{ 
+                                position: 'relative',
+                                '&:hover .delete-button': {
+                                    opacity: 1,
+                                }
+                            }}>
+                                <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>
+                                    {note.text}
+                                </Typography>
+                                <Box
+                                    className="delete-button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteNote(note.id);
+                                    }}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: -25,
+                                        right: -25,
+                                        width: 20,
+                                        height: 20,
+                                        borderRadius: '50%',
+                                        backgroundColor: theme.palette.grey[300],
+                                        color: theme.palette.grey[700],
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        opacity: 0,
+                                        transition: 'all 0.2s ease-in-out',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.grey[400],
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }}
+                                >
+                                    ×
+                                </Box>
+                            </Box>
                         </Paper>
                     ))
                 )}
