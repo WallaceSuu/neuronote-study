@@ -27,8 +27,44 @@ const NotebookSidebar = ({ refreshTrigger }) => {
     }, [pageNumber, refreshTrigger]);
 
     const handleDragStart = (e, note) => {
-        e.dataTransfer.setData('application/json', JSON.stringify(note));
+        // Store the initial position and mouse coordinates
+        const rect = e.currentTarget.getBoundingClientRect();
+        const initialX = e.clientX - rect.left;
+        const initialY = e.clientY - rect.top;
+        
+        // Add offset information to the note data
+        const noteWithOffset = {
+            ...note,
+            offsetX: initialX,
+            offsetY: initialY
+        };
+        
+        e.dataTransfer.setData('application/json', JSON.stringify(noteWithOffset));
         e.dataTransfer.effectAllowed = 'move';
+
+        // Create drag image
+        const dragPreview = document.createElement('div');
+        dragPreview.style.position = 'absolute';
+        dragPreview.style.top = '-1000px';
+        dragPreview.style.width = '300px';
+        dragPreview.style.padding = '16px';
+        dragPreview.style.backgroundColor = '#fff9c4';
+        dragPreview.style.border = '1px solid #e0e0e0';
+        dragPreview.style.borderRadius = '8px';
+        dragPreview.style.boxShadow = theme.shadows[8];
+        dragPreview.style.opacity = '0.8';
+        dragPreview.style.transform = 'rotate(-2deg)';
+        dragPreview.style.pointerEvents = 'none';
+        dragPreview.innerHTML = note.text;
+        document.body.appendChild(dragPreview);
+
+        // Calculate offset based on relative mouse position to the note
+        e.dataTransfer.setDragImage(dragPreview, initialX, initialY);
+
+        // Remove the preview after drag start
+        setTimeout(() => {
+            document.body.removeChild(dragPreview);
+        }, 0);
     };
 
     return (
@@ -78,7 +114,7 @@ const NotebookSidebar = ({ refreshTrigger }) => {
                                 p: 2,
                                 backgroundColor: '#fff9c4', // Light yellow color for sticky note
                                 transform: 'rotate(-1deg)', // Slight rotation for sticky note effect
-                                transition: 'transform 0.2s ease-in-out',
+                                transition: 'all 0.3s ease-in-out',
                                 cursor: 'grab',
                                 '&:hover': {
                                     transform: 'rotate(0deg) scale(1.02)',
@@ -86,6 +122,8 @@ const NotebookSidebar = ({ refreshTrigger }) => {
                                 },
                                 '&:active': {
                                     cursor: 'grabbing',
+                                    transform: 'rotate(-2deg) scale(0.95)',
+                                    opacity: 0.5,
                                 },
                                 position: 'relative',
                                 '&::before': {

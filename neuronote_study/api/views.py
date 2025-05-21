@@ -320,12 +320,17 @@ class getNotebookNotesView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Get or create the notebook page
-            notebook_page_obj, created = notebook_page.objects.get_or_create(
-                user=user,
-                page_number=page_number,
-                defaults={'page_title': f'Page {page_number}'}
-            )
+            # Get the notebook page and verify ownership
+            try:
+                notebook_page_obj = notebook_page.objects.get(
+                    user=user,
+                    page_number=page_number
+                )
+            except notebook_page.DoesNotExist:
+                return Response(
+                    {"error": f"Page {page_number} does not exist or you don't have access to it"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
             # Get the notebook notes
             notebook_notes = notebook_note.objects.filter(
@@ -399,3 +404,81 @@ class updateNotebookNoteView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
+class createNotebookPageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        try:
+            page_title = request.data.get('page_title')
+            page_number = request.data.get('page_number')
+            notebook_page_obj = notebook_page.objects.create(
+                user=user,
+                page_title=page_title,
+                page_number=page_number
+            )
+            return Response({'message': 'Notebook page created successfully'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class getNotebookPagesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            # Get all pages for the user
+            pages = notebook_page.objects.filter(user=user).order_by('page_number')
+            total_pages = pages.count()
+            
+            # Serialize the pages
+            pages_data = [{
+                'id': page.id,
+                'page_number': page.page_number,
+                'page_title': page.page_title
+            } for page in pages]
+            
+            return Response({
+                'total_pages': total_pages,
+                'pages': pages_data
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class deleteNotebookPageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, page_id):
+        try:
+            # Get the page to be deleted
+            page_to_delete = notebook_page.objects.get(id=page_id, user=request.user)
+            deleted_page_number = page_to_delete.page_number
+            
+            # Delete the page
+            page_to_delete.delete()
+            
+            # Get all pages with numbers greater than the deleted page
+            pages_to_update = notebook_page.objects.filter(
+                user=request.user,
+                page_number__gt=deleted_page_number
+            ).order_by('page_number')
+            
+            # Update page numbers
+            for page in pages_to_update:
+                page.page_number -= 1
+                page.page_title = f'Page {page.page_number}'
+                page.save()
+            
+            return Response({
+                'message': 'Page deleted successfully',
+                'deleted_page_number': deleted_page_number,
+                'next_page_number': deleted_page_number if deleted_page_number > 1 else 1
+            }, status=status.HTTP_200_OK)
+            
+        except notebook_page.DoesNotExist:
+            return Response({'error': 'Page not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

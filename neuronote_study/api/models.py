@@ -92,6 +92,16 @@ class notebook_page(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_notebooks')
 
+    def delete(self, *args, **kwargs):
+        # First delete all notebook notes associated with this page
+        notebook_note.objects.filter(notebook_page=self).delete()
+        # Then delete the page itself
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Notebook Page'
+        verbose_name_plural = 'Notebook Pages'
+
 class notebook_note(models.Model):
     notebook_page = models.ForeignKey(notebook_page, on_delete=models.CASCADE, related_name='notebook_notes')
     note = models.ForeignKey(note, on_delete=models.CASCADE, related_name='note_notebook_notes', db_constraint=False)

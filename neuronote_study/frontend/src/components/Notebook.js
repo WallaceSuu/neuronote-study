@@ -8,8 +8,6 @@ import NotebookSidebar from './NotebookSidebar';
 
 const Notebook = () => {
     const [notes, setNotes] = useState([]);
-    const [selectedNote, setSelectedNote] = useState(null);
-    const [isOpen, setIsOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -17,6 +15,21 @@ const Notebook = () => {
     const [error, setError] = useState(null);
     const [draggedNote, setDraggedNote] = useState(null);
     const theme = useTheme();
+
+    const fetchTotalPages = async () => {
+        try {
+            const response = await axios.get(API_ENDPOINTS.NOTEBOOK_PAGES, {
+                headers: {
+                    'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            setTotalPages(response.data.total_pages || 1);
+        } catch (error) {
+            console.error('Error fetching total pages:', error);
+            setError('Failed to fetch total pages');
+        }
+    };
 
     const fetchNotebookNotes = async () => {
         try {
@@ -37,6 +50,14 @@ const Notebook = () => {
         }
     };
 
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
+    useEffect(() => {
+        fetchTotalPages();
+    }, [refreshTrigger]);
+
     useEffect(() => {
         fetchNotebookNotes();
     }, [currentPage, refreshTrigger]);
@@ -50,8 +71,10 @@ const Notebook = () => {
         e.preventDefault();
         const noteData = JSON.parse(e.dataTransfer.getData('application/json'));
         const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        
+        // Calculate position w/ offset
+        const x = e.clientX - rect.left - (draggedNote ? draggedNote.offsetX : 0);
+        const y = e.clientY - rect.top - (draggedNote ? draggedNote.offsetY : 0);
 
         try {
             // If it's a note being moved within the notebook
@@ -106,9 +129,45 @@ const Notebook = () => {
     };
 
     const handleNoteDragStart = (e, note) => {
-        setDraggedNote(note);
+        // Store the initial position and mouse coordinates
+        const rect = e.currentTarget.getBoundingClientRect();
+        const initialX = e.clientX - rect.left;
+        const initialY = e.clientY - rect.top;
+        
+        setDraggedNote({
+            ...note,
+            initialX: e.clientX,
+            initialY: e.clientY,
+            offsetX: initialX,
+            offsetY: initialY
+        });
+        
         e.dataTransfer.setData('application/json', JSON.stringify(note));
         e.dataTransfer.effectAllowed = 'move';
+
+        // Create drag image
+        const dragPreview = document.createElement('div');
+        dragPreview.style.position = 'absolute';
+        dragPreview.style.top = '-1000px';
+        dragPreview.style.width = '300px';
+        dragPreview.style.padding = '16px';
+        dragPreview.style.backgroundColor = theme.palette.background.paper;
+        dragPreview.style.border = `1px solid ${theme.palette.divider}`;
+        dragPreview.style.borderRadius = '8px';
+        dragPreview.style.boxShadow = theme.shadows[8];
+        dragPreview.style.opacity = '0.8';
+        dragPreview.style.transform = 'rotate(-2deg)';
+        dragPreview.style.pointerEvents = 'none';
+        dragPreview.innerHTML = note.text;
+        document.body.appendChild(dragPreview);
+
+        // Calculate offset
+        e.dataTransfer.setDragImage(dragPreview, initialX, initialY);
+
+        // Remove the preview after drag start
+        setTimeout(() => {
+            document.body.removeChild(dragPreview);
+        }, 0);
     };
 
     const handleDeleteNote = async (noteId) => {
@@ -132,7 +191,7 @@ const Notebook = () => {
             <NotebookNavigation 
                 currentPage={currentPage}
                 totalPages={totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
             />
             <NotebookSidebar refreshTrigger={refreshTrigger} />
             
@@ -184,10 +243,12 @@ const Notebook = () => {
                                 border: `1px solid ${theme.palette.divider}`,
                                 borderRadius: '8px',
                                 cursor: 'move',
+                                transition: 'all 0.3s ease-in-out',
+                                transform: draggedNote?.id === note.id ? 'scale(0.95)' : 'scale(1)',
+                                opacity: draggedNote?.id === note.id ? 0.5 : 1,
                                 '&:hover': {
                                     boxShadow: theme.shadows[8],
                                     transform: 'scale(1.02)',
-                                    transition: 'all 0.2s ease-in-out',
                                 },
                                 '&:active': {
                                     cursor: 'grabbing',

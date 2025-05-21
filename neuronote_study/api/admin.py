@@ -77,3 +77,16 @@ class NotebookNoteAdmin(admin.ModelAdmin):
     search_fields = ('notebook_page', 'note', 'text')
     readonly_fields = ('created_at',)
 
+    def delete_model(self, request, obj):
+        try:
+            obj.delete()
+        except Exception as e:
+            self.message_user(request, f"Error deleting notebook note: {str(e)}", level='error')
+
+    def delete_queryset(self, request, queryset):
+        try:
+            for obj in queryset:
+                obj.delete()
+        except Exception as e:
+            self.message_user(request, f"Error deleting notebook notes: {str(e)}", level='error')
+
