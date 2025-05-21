@@ -1,5 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Box, Paper, Typography, Button, Stack, Container, useTheme, Popover, IconButton, MenuItem, Select, FormControl } from "@mui/material";
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  Button, 
+  Stack, 
+  Container, 
+  useTheme, 
+  Popover, 
+  IconButton, 
+  MenuItem, 
+  Select, 
+  FormControl,
+  Fade,
+  Zoom,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import axios from "axios";
@@ -203,52 +218,63 @@ const Note = ({ selectedNote }) => {
   if (!isAuthenticated) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper
-          sx={{
-            p: 4,
-            backgroundColor: theme.palette.background.paper,
-            backdropFilter: theme.palette.mode === 'dark' ? 'blur(10px)' : undefined,
-            borderRadius: 2,
-            border: `1px dashed ${theme.palette.primary.main}`,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
-            Please log in to view notes
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button
-              variant="contained"
-              onClick={() => navigate("/login")}
-              sx={{
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                "&:hover": {
-                  backgroundColor: theme.palette.primary.dark,
-                },
-              }}
-            >
-              Login
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/register")}
-              sx={{
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                "&:hover": {
-                  borderColor: theme.palette.primary.dark,
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
-            >
-              Register
-            </Button>
-          </Stack>
-        </Paper>
+        <Fade in={true} timeout={500}>
+          <Paper
+            sx={{
+              p: 4,
+              backgroundColor: theme.palette.background.paper,
+              backdropFilter: theme.palette.mode === 'dark' ? 'blur(10px)' : undefined,
+              borderRadius: 2,
+              border: `1px dashed ${theme.palette.primary.main}`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: theme.shadows[4],
+              }
+            }}
+          >
+            <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
+              Please log in to view notes
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                onClick={() => navigate("/login")}
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  "&:hover": {
+                    backgroundColor: theme.palette.primary.dark,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.2s ease-in-out',
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate("/register")}
+                sx={{
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    borderColor: theme.palette.primary.dark,
+                    backgroundColor: theme.palette.action.hover,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.2s ease-in-out',
+                }}
+              >
+                Register
+              </Button>
+            </Stack>
+          </Paper>
+        </Fade>
       </Container>
     );
   }
@@ -267,32 +293,86 @@ const Note = ({ selectedNote }) => {
         p: 3,
         maxWidth: "100%",
         mx: "auto",
-        overflow: "hidden",
         position: "relative",
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+          boxShadow: theme.shadows[2],
+        },
       }}
     >
       {selectedNote ? (
-        <>
-          <Typography variant="h5" sx={{ mb: 3, color: theme.palette.text.primary }}>
-            {formatBoldText(selectedNote.note_title)}
-          </Typography>
-          <Box sx={{ flex: 1, overflow: "auto" }}>
-            {formatNoteText(selectedNote.note_text)}
+        <Fade in={true} timeout={500}>
+          <Box sx={{ 
+            height: "100%", 
+            display: "flex", 
+            flexDirection: "column",
+            overflow: "hidden"
+          }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                mb: 3, 
+                color: theme.palette.text.primary,
+                fontWeight: 600,
+                letterSpacing: '0.5px',
+                pb: 2,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                flexShrink: 0
+              }}
+            >
+              {formatBoldText(selectedNote.note_title)}
+            </Typography>
+            <Box sx={{ 
+              flex: 1,
+              overflow: "auto",
+              '& > *': {
+                transition: 'all 0.2s ease-in-out',
+              },
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '4px',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.3)',
+                },
+              },
+            }}>
+              {formatNoteText(selectedNote.note_text)}
+            </Box>
           </Box>
-        </>
+        </Fade>
       ) : (
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h6" sx={{ color: theme.palette.text.secondary }}>
-            Select a note from the sidebar
-          </Typography>
-        </Box>
+        <Fade in={true} timeout={500}>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "400px",
+            }}
+          >
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: theme.palette.text.secondary,
+                textAlign: "center",
+                p: 3,
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 2,
+                maxWidth: '400px',
+              }}
+            >
+              Select a note from the sidebar
+            </Typography>
+          </Box>
+        </Fade>
       )}
 
       <Popover
@@ -311,6 +391,7 @@ const Note = ({ selectedNote }) => {
           vertical: 'bottom',
           horizontal: 'center',
         }}
+        TransitionComponent={Zoom}
       >
         <Box sx={{ 
           p: 2, 
@@ -318,9 +399,21 @@ const Note = ({ selectedNote }) => {
           borderRadius: 1,
           boxShadow: theme.shadows[3],
           minWidth: '200px',
+          border: `1px solid ${theme.palette.divider}`,
         }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            gap: 1 
+          }}>
+            <Typography 
+              variant="subtitle2" 
+              sx={{ 
+                color: theme.palette.text.secondary,
+                fontWeight: 500,
+              }}
+            >
               Add to Sidebar
             </Typography>
             <Button
@@ -331,7 +424,9 @@ const Note = ({ selectedNote }) => {
                 backgroundColor: theme.palette.primary.main,
                 '&:hover': {
                   backgroundColor: theme.palette.primary.dark,
+                  transform: 'translateY(-2px)',
                 },
+                transition: 'all 0.2s ease-in-out',
               }}
             >
               Add
