@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Container, CircularProgress } from '@mui/material';
+import { Box, Typography, Paper, Container, CircularProgress, Fade } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
@@ -187,7 +187,12 @@ const Notebook = () => {
     };
 
     return (
-        <Box sx={{ position: 'relative', minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
+        <Box sx={{ 
+            position: 'relative', 
+            minHeight: '100vh', 
+            backgroundColor: theme.palette.background.default,
+            overflow: 'hidden'
+        }}>
             <NotebookNavigation 
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -202,102 +207,143 @@ const Notebook = () => {
                 onDrop={handleDrop}
                 sx={{
                     position: 'relative',
-                    marginLeft: '250px', // Add margin to account for left sidebar
+                    marginLeft: '250px',
                     width: 'calc(100% - 250px)',
                     height: 'calc(100vh - 64px)',
                     overflow: 'hidden',
-                    padding: '20px',
+                    padding: '24px',
                     cursor: 'default',
                     backgroundColor: theme.palette.background.default,
                     backgroundImage: `
-                        linear-gradient(${theme.palette.divider} 1px, transparent 1px),
-                        linear-gradient(90deg, ${theme.palette.divider} 1px, transparent 1px)
+                        linear-gradient(${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider} 1px, transparent 1px),
+                        linear-gradient(90deg, ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider} 1px, transparent 1px)
                     `,
                     backgroundSize: '20px 20px',
                     border: `2px dashed ${theme.palette.divider}`,
-                    borderRadius: '8px'
+                    borderRadius: '12px',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                        borderColor: theme.palette.primary.main,
+                    }
                 }}
             >
                 {isLoading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        <CircularProgress />
-                    </Box>
+                    <Fade in timeout={500}>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            height: '100%' 
+                        }}>
+                            <CircularProgress size={40} />
+                        </Box>
+                    </Fade>
                 ) : error ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        <Typography color="error">{error}</Typography>
-                    </Box>
+                    <Fade in timeout={500}>
+                        <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center', 
+                            height: '100%' 
+                        }}>
+                            <Typography 
+                                color="error"
+                                sx={{
+                                    p: 3,
+                                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                    borderRadius: 2,
+                                    maxWidth: '600px',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                {error}
+                            </Typography>
+                        </Box>
+                    </Fade>
                 ) : (
                     notes.map((note) => (
-                        <Paper
-                            key={note.id}
-                            draggable
-                            onDragStart={(e) => handleNoteDragStart(e, note)}
-                            elevation={3}
-                            sx={{
-                                position: 'absolute',
-                                left: note.location_x || 0,
-                                top: note.location_y || 0,
-                                zIndex: note.location_z || 0,
-                                padding: '16px',
-                                maxWidth: '300px',
-                                backgroundColor: theme.palette.background.paper,
-                                border: `1px solid ${theme.palette.divider}`,
-                                borderRadius: '8px',
-                                cursor: 'move',
-                                transition: 'all 0.3s ease-in-out',
-                                transform: draggedNote?.id === note.id ? 'scale(0.95)' : 'scale(1)',
-                                opacity: draggedNote?.id === note.id ? 0.5 : 1,
-                                '&:hover': {
-                                    boxShadow: theme.shadows[8],
-                                    transform: 'scale(1.02)',
-                                },
-                                '&:active': {
-                                    cursor: 'grabbing',
-                                }
-                            }}
-                        >
-                            <Box sx={{ 
-                                position: 'relative',
-                                '&:hover .delete-button': {
-                                    opacity: 1,
-                                }
-                            }}>
-                                <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>
-                                    {note.text}
-                                </Typography>
-                                <Box
-                                    className="delete-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteNote(note.id);
-                                    }}
-                                    sx={{
-                                        position: 'absolute',
-                                        top: -25,
-                                        right: -25,
-                                        width: 20,
-                                        height: 20,
-                                        borderRadius: '50%',
-                                        backgroundColor: theme.palette.grey[300],
-                                        color: theme.palette.grey[700],
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        cursor: 'pointer',
-                                        opacity: 0,
-                                        transition: 'all 0.2s ease-in-out',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        '&:hover': {
-                                            backgroundColor: theme.palette.grey[400],
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }}
-                                >
-                                    ×
+                        <Fade in timeout={500} key={note.id}>
+                            <Paper
+                                draggable
+                                onDragStart={(e) => handleNoteDragStart(e, note)}
+                                elevation={3}
+                                sx={{
+                                    position: 'absolute',
+                                    left: note.location_x || 0,
+                                    top: note.location_y || 0,
+                                    zIndex: note.location_z || 0,
+                                    padding: '16px',
+                                    maxWidth: '300px',
+                                    backgroundColor: theme.palette.background.paper,
+                                    border: `1px solid ${theme.palette.divider}`,
+                                    borderRadius: '12px',
+                                    cursor: 'move',
+                                    transition: 'all 0.3s ease-in-out',
+                                    transform: draggedNote?.id === note.id ? 'scale(0.95)' : 'scale(1)',
+                                    opacity: draggedNote?.id === note.id ? 0.5 : 1,
+                                    '&:hover': {
+                                        boxShadow: theme.shadows[8],
+                                        transform: 'scale(1.02) translateY(-2px)',
+                                    },
+                                    '&:active': {
+                                        cursor: 'grabbing',
+                                        transform: 'scale(0.98)',
+                                    }
+                                }}
+                            >
+                                <Box sx={{ 
+                                    position: 'relative',
+                                    '&:hover .delete-button': {
+                                        opacity: 1,
+                                        transform: 'scale(1)',
+                                    }
+                                }}>
+                                    <Typography 
+                                        variant="body1" 
+                                        sx={{ 
+                                            color: theme.palette.text.primary,
+                                            lineHeight: 1.5,
+                                            fontSize: '0.95rem',
+                                        }}
+                                    >
+                                        {note.text}
+                                    </Typography>
+                                    <Box
+                                        className="delete-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteNote(note.id);
+                                        }}
+                                        sx={{
+                                            position: 'absolute',
+                                            top: -12,
+                                            right: -12,
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: '50%',
+                                            backgroundColor: theme.palette.error.light,
+                                            color: theme.palette.error.contrastText,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            opacity: 0,
+                                            transform: 'scale(0.8)',
+                                            transition: 'all 0.2s ease-in-out',
+                                            fontSize: '16px',
+                                            fontWeight: 'bold',
+                                            boxShadow: theme.shadows[2],
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.error.main,
+                                                transform: 'scale(1.1)',
+                                            }
+                                        }}
+                                    >
+                                        ×
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </Paper>
+                            </Paper>
+                        </Fade>
                     ))
                 )}
             </Box>

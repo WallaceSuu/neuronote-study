@@ -76,3 +76,4 @@ Thumbs.db
 .VSCodeCounter/*.json 
 .VSCodeCounter/2025-05-14_01-00-51/details.md
 /.VSCodeCounter
+*.sqlite3

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, IconButton, Typography, Paper } from '@mui/material';
+import { Box, IconButton, Typography, Paper, Fade } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import AddIcon from '@mui/icons-material/Add';
@@ -81,33 +81,58 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange, refreshPage
   };
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '1rem',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 1000,
-      }}
-    >
-      <Paper
-        elevation={3}
+    <Fade in timeout={500}>
+      <Box
         sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
           display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          padding: '0.5rem 1rem',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '50px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          justifyContent: 'center',
+          padding: '1rem',
+          backgroundColor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(10px)',
+          zIndex: 1000,
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            backgroundColor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.6)',
+          }
         }}
       >
-        {currentPage > 1 && (
+        <Paper
+          elevation={3}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            padding: '0.75rem 1.5rem',
+            backgroundColor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '50px',
+            border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'}`,
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              backgroundColor: theme.palette.mode === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.15)',
+              transform: 'translateY(-2px)',
+              boxShadow: theme.shadows[8],
+            }
+          }}
+        >
+          {currentPage > 1 && (
+            <IconButton
+              sx={{
+                color: theme.palette.error.light,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.2s ease',
+              }}
+              onClick={() => handleDeletePage(currentPage)}
+            >
+              <RemoveIcon />
+            </IconButton>
+          )}
           <IconButton
             sx={{
               color: theme.palette.primary.main,
@@ -117,64 +142,53 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange, refreshPage
               },
               transition: 'all 0.2s ease',
             }}
-            onClick={() => handleDeletePage(currentPage)}
+            onClick={handlePreviousPage}
           >
-            <RemoveIcon />
+            <ArrowBackIosNewIcon />
           </IconButton>
-        )}
-        <IconButton
-          sx={{
-            color: theme.palette.primary.main,
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-          onClick={handlePreviousPage}
-        >
-          <ArrowBackIosNewIcon />
-        </IconButton>
-        <Typography
-          variant="body1"
-          sx={{
-            color: theme.palette.text.primary,
-            minWidth: '60px',
-            textAlign: 'center',
-            fontWeight: 'medium',
-          }}
-        >
-          Page {currentPage}/{totalPages}
-        </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: theme.palette.text.primary,
+              minWidth: '80px',
+              textAlign: 'center',
+              fontWeight: 'medium',
+              letterSpacing: '0.5px',
+              fontSize: '1.1rem',
+            }}
+          >
+            Page {currentPage}/{totalPages}
+          </Typography>
 
-        <IconButton
-          sx={{
-            color: theme.palette.primary.main,
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-          onClick={handleNextPage}
-        >
-          <ArrowForwardIosIcon />
-        </IconButton>
-        <IconButton
-          sx={{
-            color: theme.palette.primary.main,
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              transform: 'scale(1.1)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-          onClick={handleCreatePage}
-        >
-          <AddIcon />
-        </IconButton>
-      </Paper>
-    </Box>
+          <IconButton
+            sx={{
+              color: theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'scale(1.1)',
+              },
+              transition: 'all 0.2s ease',
+            }}
+            onClick={handleNextPage}
+          >
+            <ArrowForwardIosIcon />
+          </IconButton>
+          <IconButton
+            sx={{
+              color: theme.palette.success.light,
+              '&:hover': {
+                backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                transform: 'scale(1.1)',
+              },
+              transition: 'all 0.2s ease',
+            }}
+            onClick={handleCreatePage}
+          >
+            <AddIcon />
+          </IconButton>
+        </Paper>
+      </Box>
+    </Fade>
   );
 };
 

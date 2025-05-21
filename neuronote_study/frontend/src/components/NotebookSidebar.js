@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, List, ListItem, useTheme } from '@mui/material';
+import { Box, Typography, Paper, List, ListItem, useTheme, Fade } from '@mui/material';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 
@@ -77,89 +77,120 @@ const NotebookSidebar = ({ refreshTrigger }) => {
                 width: '250px',
                 height: 'calc(100vh - 64px)',
                 backgroundColor: theme.palette.background.default,
-                overflow: 'auto',
+                overflow: 'hidden',
                 zIndex: 1000,
                 borderRight: `1px solid ${theme.palette.divider}`,
-                transition: 'transform 0.3s ease-in-out',
+                transition: 'all 0.3s ease-in-out',
                 '&:hover': {
                     boxShadow: theme.shadows[8],
                 }
             }}
         >
-            <Typography variant="h6" sx={{ 
-                p: 2, 
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-                position: 'sticky',
-                top: 0,
-                zIndex: 1
-            }}>
+            <Typography 
+                variant="h6" 
+                sx={{ 
+                    p: 2.5, 
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    backgroundColor: theme.palette.background.paper,
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: theme.palette.primary.main,
+                    fontWeight: 500,
+                    letterSpacing: '0.5px',
+                }}
+            >
                 Notebook Notes
             </Typography>
-            <List sx={{ width: '100%', p: 2 }}>
-                {notebookNotes.map((note) => (
-                    <ListItem 
-                        key={note.id} 
-                        sx={{ 
-                            p: 0, 
-                            mb: 2,
-                            display: 'block'
-                        }}
-                    >
-                        <Paper
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, note)}
-                            elevation={2}
-                            sx={{
-                                p: 2,
-                                backgroundColor: '#fff9c4', // Light yellow color for sticky note
-                                transform: 'rotate(-1deg)', // Slight rotation for sticky note effect
-                                transition: 'all 0.3s ease-in-out',
-                                cursor: 'grab',
-                                '&:hover': {
-                                    transform: 'rotate(0deg) scale(1.02)',
-                                    boxShadow: theme.shadows[4],
-                                },
-                                '&:active': {
-                                    cursor: 'grabbing',
-                                    transform: 'rotate(-2deg) scale(0.95)',
-                                    opacity: 0.5,
-                                },
-                                position: 'relative',
-                                '&::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    background: 'linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05) 75%, transparent 75%, transparent)',
-                                    backgroundSize: '3px 3px',
-                                    opacity: 0.5,
-                                    pointerEvents: 'none',
-                                }
+            <List 
+                sx={{ 
+                    width: '100%', 
+                    p: 2,
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: theme.palette.divider,
+                        borderRadius: '4px',
+                        '&:hover': {
+                            backgroundColor: theme.palette.action.selected,
+                        },
+                    },
+                }}
+            >
+                {notebookNotes.map((note, index) => (
+                    <Fade in timeout={500} key={note.id} style={{ transitionDelay: `${index * 50}ms` }}>
+                        <ListItem 
+                            sx={{ 
+                                p: 0, 
+                                mb: 2,
+                                display: 'block'
                             }}
                         >
-                            <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                    color: '#2c3e50',
-                                    fontSize: '0.9rem',
-                                    lineHeight: 1.4,
-                                    wordBreak: 'break-word',
-                                    maxHeight: '100px',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 4,
-                                    WebkitBoxOrient: 'vertical',
-                                    fontWeight: 500
+                            <Paper
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, note)}
+                                elevation={2}
+                                sx={{
+                                    p: 2,
+                                    backgroundColor: '#fff9c4',
+                                    transform: 'rotate(-1deg)',
+                                    transition: 'all 0.3s ease-in-out',
+                                    cursor: 'grab',
+                                    position: 'relative',
+                                    '&:hover': {
+                                        transform: 'rotate(0deg) scale(1.02) translateY(-2px)',
+                                        boxShadow: theme.shadows[4],
+                                    },
+                                    '&:active': {
+                                        cursor: 'grabbing',
+                                        transform: 'rotate(-2deg) scale(0.95)',
+                                        opacity: 0.5,
+                                    },
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        background: 'linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05) 75%, transparent 75%, transparent)',
+                                        backgroundSize: '3px 3px',
+                                        opacity: 0.5,
+                                        pointerEvents: 'none',
+                                        borderRadius: 'inherit',
+                                    }
                                 }}
                             >
-                                {note.text}
-                            </Typography>
-                        </Paper>
-                    </ListItem>
+                                <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                        color: '#2c3e50',
+                                        fontSize: '0.9rem',
+                                        lineHeight: 1.4,
+                                        wordBreak: 'break-word',
+                                        maxHeight: '100px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 4,
+                                        WebkitBoxOrient: 'vertical',
+                                        fontWeight: 500,
+                                        position: 'relative',
+                                        zIndex: 1,
+                                    }}
+                                >
+                                    {note.text}
+                                </Typography>
+                            </Paper>
+                        </ListItem>
+                    </Fade>
                 ))}
             </List>
         </Paper>
