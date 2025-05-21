@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, useTheme, TextField, Button, Paper, Avatar, CircularProgress } from '@mui/material';
+import { Box, Typography, useTheme, TextField, Button, Paper, Avatar, CircularProgress, Fade } from '@mui/material';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -121,16 +121,47 @@ const ChatBox = ({ selectedNote }) => {
         }}>
             {/* Header */}
             <Box sx={{ 
-                p: 2, 
-                borderBottom: `1px solid ${theme.palette.divider}`
+                p: 3,
+                backgroundColor: theme.palette.background.paper,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
             }}>
                 {selectedNote ? (
-                    <Typography variant="h6" sx={{ textAlign: "center", color: theme.palette.text.secondary }}>
-                        Chatting about: {selectedNote.note_title}
-                    </Typography>
+                    <>
+                        <Avatar 
+                            sx={{ 
+                                bgcolor: theme.palette.primary.light,
+                                width: 40,
+                                height: 40,
+                                boxShadow: theme.shadows[1],
+                            }}
+                        >
+                            <SmartToyIcon />
+                        </Avatar>
+                        <Typography 
+                            sx={{ 
+                                color: theme.palette.text.secondary,
+                                fontSize: '1.1rem',
+                                fontWeight: 400,
+                                letterSpacing: '0.3px',
+                            }}
+                        >
+                            Let's chat about <span style={{ color: theme.palette.primary.main, fontWeight: 500 }}>{selectedNote.note_title}</span>
+                        </Typography>
+                    </>
                 ) : (
-                    <Typography sx={{ textAlign: "center", color: theme.palette.text.secondary }}>
-                        Please select a note from the sidebar to start chatting.
+                    <Typography 
+                        sx={{ 
+                            textAlign: "center", 
+                            color: theme.palette.text.secondary,
+                            fontSize: '1.1rem',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        Choose a note to start a conversation...
                     </Typography>
                 )}
             </Box>
@@ -139,55 +170,106 @@ const ChatBox = ({ selectedNote }) => {
             <Box sx={{ 
                 flex: 1, 
                 overflowY: 'auto',
-                p: 2,
+                p: 3,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 2
+                gap: 2.5,
+                '&::-webkit-scrollbar': {
+                    width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: theme.palette.divider,
+                    borderRadius: '4px',
+                    '&:hover': {
+                        backgroundColor: theme.palette.action.selected,
+                    },
+                },
             }}>
                 {previousMessages.map((msg, index) => (
-                    <Box
-                        key={index}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                            alignItems: 'flex-start',
-                            gap: 1,
-                            maxWidth: '80%',
-                            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start'
-                        }}
-                    >
-                        {msg.role === 'assistant' && (
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                                <SmartToyIcon />
-                            </Avatar>
-                        )}
-                        <Paper
-                            elevation={1}
+                    <Fade in timeout={500} key={index}>
+                        <Box
                             sx={{
-                                p: 2,
-                                bgcolor: msg.role === 'user' ? theme.palette.primary.main : theme.palette.background.paper,
-                                color: msg.role === 'user' ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                                borderRadius: 2,
-                                maxWidth: '100%'
+                                display: 'flex',
+                                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                alignItems: 'flex-start',
+                                gap: 1.5,
+                                maxWidth: '85%',
+                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                animation: 'slideIn 0.3s ease-out',
+                                '@keyframes slideIn': {
+                                    '0%': {
+                                        opacity: 0,
+                                        transform: msg.role === 'user' ? 'translateX(20px)' : 'translateX(-20px)',
+                                    },
+                                    '100%': {
+                                        opacity: 1,
+                                        transform: 'translateX(0)',
+                                    },
+                                },
                             }}
                         >
-                            <Box sx={{ whiteSpace: 'pre-wrap' }}>
-                                {formatMessage(msg.message)}
-                            </Box>
-                        </Paper>
-                        {msg.role === 'user' && (
-                            <Avatar sx={{ bgcolor: theme.palette.secondary.main }}>
-                                <PersonIcon />
-                            </Avatar>
-                        )}
-                    </Box>
+                            {msg.role === 'assistant' && (
+                                <Avatar 
+                                    sx={{ 
+                                        bgcolor: theme.palette.primary.light,
+                                        boxShadow: theme.shadows[1],
+                                        width: 36,
+                                        height: 36,
+                                    }}
+                                >
+                                    <SmartToyIcon fontSize="small" />
+                                </Avatar>
+                            )}
+                            <Paper
+                                elevation={1}
+                                sx={{
+                                    p: 2,
+                                    bgcolor: msg.role === 'user' 
+                                        ? theme.palette.primary.main 
+                                        : theme.palette.background.paper,
+                                    color: msg.role === 'user' 
+                                        ? theme.palette.primary.contrastText 
+                                        : theme.palette.text.primary,
+                                    borderRadius: 3,
+                                    maxWidth: '100%',
+                                    transition: 'all 0.2s ease-in-out',
+                                    '&:hover': {
+                                        boxShadow: theme.shadows[2],
+                                    },
+                                }}
+                            >
+                                <Box sx={{ 
+                                    whiteSpace: 'pre-wrap',
+                                    fontSize: '0.95rem',
+                                    lineHeight: 1.5,
+                                }}>
+                                    {formatMessage(msg.message)}
+                                </Box>
+                            </Paper>
+                            {msg.role === 'user' && (
+                                <Avatar 
+                                    sx={{ 
+                                        bgcolor: theme.palette.secondary.light,
+                                        boxShadow: theme.shadows[1],
+                                        width: 36,
+                                        height: 36,
+                                    }}
+                                >
+                                    <PersonIcon fontSize="small" />
+                                </Avatar>
+                            )}
+                        </Box>
+                    </Fade>
                 ))}
                 <div ref={messagesEndRef} />
             </Box>
 
             {/* Input Container */}
             <Paper
-                elevation={3}
+                elevation={2}
                 sx={{
                     p: 2,
                     display: 'flex',
@@ -197,7 +279,9 @@ const ChatBox = ({ selectedNote }) => {
                     position: 'sticky',
                     bottom: 0,
                     zIndex: 2,
-                    bgcolor: theme.palette.background.paper
+                    bgcolor: theme.palette.background.paper,
+                    transition: 'all 0.2s ease-in-out',
+                    borderRadius: 0,
                 }}
             >
                 <TextField
@@ -211,6 +295,17 @@ const ChatBox = ({ selectedNote }) => {
                     onKeyDown={handleKeyPress}
                     multiline
                     maxRows={4}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            transition: 'all 0.2s ease-in-out',
+                            borderRadius: 2,
+                            '&:hover': {
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: theme.palette.primary.main,
+                                },
+                            },
+                        },
+                    }}
                 />
                 <Button 
                     variant="contained" 
@@ -221,7 +316,12 @@ const ChatBox = ({ selectedNote }) => {
                         height: 40,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease-in-out',
+                        borderRadius: 2,
+                        '&:hover': {
+                            transform: 'scale(1.05)',
+                        },
                     }}
                 >
                     {isLoading ? (
