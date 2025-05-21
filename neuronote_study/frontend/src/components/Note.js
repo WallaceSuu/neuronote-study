@@ -84,14 +84,14 @@ const Note = ({ selectedNote }) => {
     }
   };
 
-  const handlePageSelect = async (pageNumber) => {
+  const handleAddToSidebar = async () => {
     if (selection && selectedNote) {
       try {
-        console.log('Selected note in handlePageSelect:', selectedNote);
+        console.log('Selected note in handleAddToSidebar:', selectedNote);
         if (!selectedNote.note_id) {
           throw new Error('Selected note has no ID');
         }
-        await handleCreateNotebookNote(pageNumber, selectedNote.note_id, selection.text);
+        await handleCreateNotebookNote(1, selectedNote.note_id, selection.text);
         setSelection(null);
         setPopoverAnchor(null);
       } catch (error) {
@@ -319,47 +319,14 @@ const Note = ({ selectedNote }) => {
           boxShadow: theme.shadows[3],
           minWidth: '200px',
         }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: theme.palette.text.secondary }}>
-            Add to Notebook Page:
-          </Typography>
-          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-            <Select
-              value={notebookPage}
-              onChange={(e) => setNotebookPage(e.target.value)}
-              sx={{
-                backgroundColor: theme.palette.background.default,
-                '& .MuiSelect-select': {
-                  color: theme.palette.text.primary,
-                },
-              }}
-            >
-              {[...Array(totalPages)].map((_, index) => (
-                <MenuItem key={index + 1} value={index + 1}>
-                  Page {index + 1}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button
-              size="small"
-              onClick={() => {
-                setPopoverAnchor(null);
-                setSelection(null);
-              }}
-              sx={{
-                color: theme.palette.text.secondary,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-              }}
-            >
-              Cancel
-            </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle2" sx={{ color: theme.palette.text.secondary }}>
+              Add to Sidebar
+            </Typography>
             <Button
               size="small"
               variant="contained"
-              onClick={() => handlePageSelect(notebookPage)}
+              onClick={handleAddToSidebar}
               sx={{
                 backgroundColor: theme.palette.primary.main,
                 '&:hover': {
@@ -367,7 +334,7 @@ const Note = ({ selectedNote }) => {
                 },
               }}
             >
-              Add to Page
+              Add
             </Button>
           </Box>
         </Box>

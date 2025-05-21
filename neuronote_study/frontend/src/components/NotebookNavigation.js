@@ -54,8 +54,8 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
         }
       });
 
-      // Find the page with the matching page number
-      const page = pagesResponse.data.find(p => p.page_number === pageNumber);
+      // Find the page with the matching page number from the pages array
+      const page = pagesResponse.data.pages.find(p => p.page_number === pageNumber);
       if (!page) {
         console.error('Page not found');
         return;
@@ -105,9 +105,21 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
           border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
-        <RemoveIcon>
-          
-        </RemoveIcon>
+        {currentPage > 1 && (
+          <IconButton
+            sx={{
+              color: theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'scale(1.1)',
+              },
+              transition: 'all 0.2s ease',
+            }}
+            onClick={() => handleDeletePage(currentPage)}
+          >
+            <RemoveIcon />
+          </IconButton>
+        )}
         <IconButton
           sx={{
             color: theme.palette.primary.main,
@@ -159,21 +171,6 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
         >
           <AddIcon />
         </IconButton>
-        {currentPage > 1 && (
-          <IconButton
-            sx={{
-              color: theme.palette.error.main,
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transform: 'scale(1.1)',
-              },
-              transition: 'all 0.2s ease',
-            }}
-            onClick={() => handleDeletePage(currentPage)}
-          >
-            <RemoveIcon />
-          </IconButton>
-        )}
       </Paper>
     </Box>
   );
