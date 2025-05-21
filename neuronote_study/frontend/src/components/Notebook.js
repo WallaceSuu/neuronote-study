@@ -192,6 +192,7 @@ const Notebook = () => {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
+                refreshPages={() => setRefreshTrigger(prev => prev + 1)}
             />
             <NotebookSidebar refreshTrigger={refreshTrigger} />
             

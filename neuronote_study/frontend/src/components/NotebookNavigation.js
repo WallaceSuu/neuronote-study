@@ -9,7 +9,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 
 
-const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
+const NotebookNavigation = ({ currentPage, totalPages, onPageChange, refreshPages }) => {
   const theme = useTheme();
 
   const handleNextPage = () => {
@@ -38,6 +38,7 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
 
       if (response.status === 201) {
         onPageChange(totalPages + 1);
+        refreshPages();
       }
     } catch (error) {
       console.error('Error creating notebook page:', error);
@@ -72,6 +73,7 @@ const NotebookNavigation = ({ currentPage, totalPages, onPageChange }) => {
       if (response.status === 200) {
         const nextPageNumber = response.data.next_page_number;
         onPageChange(nextPageNumber);
+        refreshPages();
       }
     } catch (error) {
       console.error('Error deleting notebook page:', error);
