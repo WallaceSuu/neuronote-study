@@ -14,7 +14,8 @@ import {
     ListItem,
     ListItemText,
     ListItemAvatar,
-    Paper
+    Paper,
+    useTheme
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -25,7 +26,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import EditProfile from './EditProfile';
 
 const Profile = () => {
-
+    const theme = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const [userDetails, setUserDetails] = useState(null);
     const [flashcards, setFlashcards] = useState(null);
@@ -110,16 +111,33 @@ const Profile = () => {
     
     
     return userDetails !== null ? (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-                <Grid container spacing={3} alignItems="center">
+        <Container maxWidth="lg" sx={{ 
+            py: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            minHeight: '100vh'
+        }}>
+            <Paper 
+                elevation={3} 
+                sx={{ 
+                    p: 3, 
+                    mb: 4, 
+                    width: '100%',
+                    border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                    borderRadius: 2
+                }}
+            >
+                <Grid container spacing={3} alignItems="center" justifyContent="center">
                     <Grid item>
                         <Avatar sx={{ width: 100, height: 100 }}>JD</Avatar>
                     </Grid>
                     <Grid item xs>
-                        <Typography variant="h4">{userDetails.username}</Typography>
-                        <Typography variant="subtitle1" color="text.secondary">{userDetails.email}</Typography>
-                        <Typography variant="subtitle2" color="text.secondary">{userDetails.is_active === true ? "Currently Online" : "Currently    Offline"}</Typography>
+                        <Typography variant="h4" align="center">{userDetails.username}</Typography>
+                        <Typography variant="subtitle1" color="text.secondary" align="center">{userDetails.email}</Typography>
+                        <Typography variant="subtitle2" color="text.secondary" align="center">
+                            {userDetails.is_active === true ? "Currently Online" : "Currently Offline"}
+                        </Typography>
                     </Grid>
                     <Grid item>
                         <Button variant="contained" color="primary" onClick={handleEditProfile}>
@@ -130,48 +148,170 @@ const Profile = () => {
             </Paper>
 
             {/* Stats Overview */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={4}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                <DescriptionIcon sx={{ mr: 1 }} />
-                                PDFs
+            <Grid 
+                container 
+                spacing={3} 
+                sx={{ 
+                    mb: 4, 
+                    width: '100%', 
+                    maxWidth: '900px',
+                    mx: 'auto',
+                    display: 'flex',
+                    justifyContent: 'center'
+                }}
+            >
+                <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Card sx={{ 
+                        border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                        borderRadius: 2,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.2s ease-in-out',
+                        width: '100%',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: theme.shadows[4],
+                        }
+                    }}>
+                        <CardContent sx={{ 
+                            textAlign: 'center',
+                            width: '100%',
+                            p: 3
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <DescriptionIcon sx={{ 
+                                    fontSize: '2rem',
+                                    color: theme.palette.primary.main,
+                                    mr: 1
+                                }} />
+                                <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                    PDFs
+                                </Typography>
+                            </Box>
+                            <Typography variant="h3" sx={{ 
+                                fontWeight: 600,
+                                color: theme.palette.primary.main
+                            }}>
+                                {pdfs ? pdfs.length : 0}
                             </Typography>
-                            <Typography variant="h4">{pdfs ? pdfs.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                <NoteIcon sx={{ mr: 1 }} />
-                                Notes
+                <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Card sx={{ 
+                        border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                        borderRadius: 2,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.2s ease-in-out',
+                        width: '100%',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: theme.shadows[4],
+                        }
+                    }}>
+                        <CardContent sx={{ 
+                            textAlign: 'center',
+                            width: '100%',
+                            p: 3
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <NoteIcon sx={{ 
+                                    fontSize: '2rem',
+                                    color: theme.palette.primary.main,
+                                    mr: 1
+                                }} />
+                                <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                    Notes
+                                </Typography>
+                            </Box>
+                            <Typography variant="h3" sx={{ 
+                                fontWeight: 600,
+                                color: theme.palette.primary.main
+                            }}>
+                                {notes ? notes.notes.length : 0}
                             </Typography>
-                            <Typography variant="h4">{notes ? notes.notes.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                <SchoolIcon sx={{ mr: 1 }} />
-                                Flashcards
+                <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Card sx={{ 
+                        border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                        borderRadius: 2,
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.2s ease-in-out',
+                        width: '100%',
+                        '&:hover': {
+                            transform: 'translateY(-4px)',
+                            boxShadow: theme.shadows[4],
+                        }
+                    }}>
+                        <CardContent sx={{ 
+                            textAlign: 'center',
+                            width: '100%',
+                            p: 3
+                        }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                mb: 2
+                            }}>
+                                <SchoolIcon sx={{ 
+                                    fontSize: '2rem',
+                                    color: theme.palette.primary.main,
+                                    mr: 1
+                                }} />
+                                <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                    Flashcards
+                                </Typography>
+                            </Box>
+                            <Typography variant="h3" sx={{ 
+                                fontWeight: 600,
+                                color: theme.palette.primary.main
+                            }}>
+                                {flashcards ? flashcards.flashcards.length : 0}
                             </Typography>
-                            <Typography variant="h4">{flashcards ? flashcards.flashcards.length : 0}</Typography>
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
 
             {/* Recent Activity */}
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{ width: '100%' }}>
                 {/* Recent PDFs */}
                 <Grid item xs={12} md={4}>
-                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
-                        <Typography variant="h6" gutterBottom>Recent PDFs</Typography>
+                    <Paper 
+                        elevation={3} 
+                        sx={{ 
+                            p: 2, 
+                            height: '100%', 
+                            position: 'relative',
+                            border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                            borderRadius: 2
+                        }}
+                    >
+                        <Typography variant="h6" gutterBottom align="center">Recent PDFs</Typography>
                         <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
                             <List disablePadding>
                                 {pdfs && pdfs.slice(0, 3).map((pdf) => (
@@ -202,8 +342,17 @@ const Profile = () => {
 
                 {/* Recent Notes */}
                 <Grid item xs={12} md={4}>
-                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
-                        <Typography variant="h6" gutterBottom>Recent Notes</Typography>
+                    <Paper 
+                        elevation={3} 
+                        sx={{ 
+                            p: 2, 
+                            height: '100%', 
+                            position: 'relative',
+                            border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                            borderRadius: 2
+                        }}
+                    >
+                        <Typography variant="h6" gutterBottom align="center">Recent Notes</Typography>
                         <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
                             <List disablePadding>
                                 {notes && notes.notes.slice(0, 3).map((note) => (
@@ -234,8 +383,17 @@ const Profile = () => {
 
                 {/* Recent Flashcards */}
                 <Grid item xs={12} md={4}>
-                    <Paper elevation={3} sx={{ p: 2, height: '100%', position: 'relative' }}>
-                        <Typography variant="h6" gutterBottom>Recent Flashcards</Typography>
+                    <Paper 
+                        elevation={3} 
+                        sx={{ 
+                            p: 2, 
+                            height: '100%', 
+                            position: 'relative',
+                            border: `1px solid ${theme.palette.mode === 'light' ? 'rgba(0, 0, 0, 0.1)' : theme.palette.divider}`,
+                            borderRadius: 2
+                        }}
+                    >
+                        <Typography variant="h6" gutterBottom align="center">Recent Flashcards</Typography>
                         <Box sx={{ position: 'relative', maxHeight: '300px', overflow: 'hidden' }}>
                             <List disablePadding>
                                 {flashcards && flashcards.flashcards.slice(0, 3).map((flashcard) => (
@@ -268,8 +426,16 @@ const Profile = () => {
             <EditProfile open={isEditing} onClose={handleCloseEdit} />
         </Container>
     ) : (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Typography variant="h4">Unable to fetch user details, please try again later.</Typography>
+        <Container maxWidth="lg" sx={{ 
+            py: 4,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh'
+        }}>
+            <Typography variant="h4" align="center">
+                Unable to fetch user details, please try again later.
+            </Typography>
         </Container>
     );
 };
