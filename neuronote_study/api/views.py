@@ -12,6 +12,8 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from .serializers import *
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 class uploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -145,17 +147,27 @@ class editUsernameView(APIView):
             return Response({
                 "error": "New username is required"
             }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            if User.objects.filter(username=new_username).exists():
+        
+        # Check if username has been changed in the last week
+        if user.last_username_change:
+            one_week_ago = timezone.now() - timedelta(days=7)
+            if user.last_username_change > one_week_ago:
+                days_left = 7 - (timezone.now() - user.last_username_change).days
                 return Response({
-                    "error": "Username already exists"
+                    "error": f"You can only change your username once a week. Try again in {days_left} days."
                 }, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                user.username = new_username
-                user.save()
-                return Response({
-                    "message": "Username updated successfully"
-                }, status=status.HTTP_200_OK)
+
+        if User.objects.filter(username__iexact=new_username).exists():
+            return Response({
+                "error": "Username already exists"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user.username = new_username
+            user.last_username_change = timezone.now()
+            user.save()
+            return Response({
+                "message": "Username updated successfully"
+            }, status=status.HTTP_200_OK)
 
 
 class DeleteNoteView(APIView):

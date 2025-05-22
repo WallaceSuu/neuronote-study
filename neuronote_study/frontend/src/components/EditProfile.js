@@ -25,6 +25,8 @@ const EditProfile = ({ open, onClose, userDetails }) => {
         confirmPassword: ''
     });
 
+    const [error, setError] = useState('');
+
     // Update formData on userDetails change
     useEffect(() => {
         if (userDetails) {
@@ -46,6 +48,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         
         // Only send username update if it has changed
         if (formData.username !== userDetails.username) {
@@ -56,19 +59,20 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                     axiosConfig
                 );
                 if (response.status === 200) {
-                    console.log('Username updated successfully');
                     window.location.reload();
+                    onClose();
                 } else {
-                    console.error('Error changing username:', response.data.error);
+                    setError(response.data.error);
                 }
             } catch (error) {
-                console.error('Error changing username:', error);
+                setError(error.response.data.error);
             }
+        } else {
+            onClose();
         }
 
         // TODO: Implement password change
         console.log('Form submitted:', formData);
-        onClose();
     };
 
     return (
@@ -95,6 +99,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
             <form onSubmit={handleSubmit}>
                 <DialogContent dividers>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {error && <Typography variant="subtitle1" sx={{ textAlign: 'center', mt: 2, mb: 1, color: 'red' }}>{error}</Typography>}
                         <TextField
                             label="Email"
                             name="email"

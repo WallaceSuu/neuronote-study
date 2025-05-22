@@ -12,6 +12,7 @@ class User(AbstractUser):
     user_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
+    last_username_change = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.username
