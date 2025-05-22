@@ -8,9 +8,12 @@ import {
     Button,
     Box,
     IconButton,
-    Typography
+    Typography,
+    InputAdornment
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useThemeContext } from '../context/ThemeContext';
 import axios from 'axios';
 import { API_ENDPOINTS, axiosConfig } from '../config';
@@ -27,6 +30,8 @@ const EditProfile = ({ open, onClose, userDetails }) => {
 
     const [usernameError, setUsernameError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Update formData on userDetails change
     useEffect(() => {
@@ -80,7 +85,6 @@ const EditProfile = ({ open, onClose, userDetails }) => {
             return false;
         }
         
-        // Check for password complexity
         const hasUpperCase = /[A-Z]/.test(formData.newPassword);
         const hasLowerCase = /[a-z]/.test(formData.newPassword);
         const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword);
@@ -89,7 +93,6 @@ const EditProfile = ({ open, onClose, userDetails }) => {
             setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, and one special character');
             return false;
         }
-
         return true;
     };
 
@@ -229,8 +232,20 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             value={formData.newPassword}
                             onChange={handleChange}
                             fullWidth
-                            type="password"
+                            type={showNewPassword ? "text" : "password"}
                             error={!!passwordError}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            edge="end"
+                                        >
+                                            {showNewPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                         <TextField
                             label="Confirm New Password"
@@ -238,8 +253,20 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             fullWidth
-                            type="password"
+                            type={showConfirmPassword ? "text" : "password"}
                             error={!!passwordError}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            edge="end"
+                                        >
+                                            {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                     </Box>
                 </DialogContent>
