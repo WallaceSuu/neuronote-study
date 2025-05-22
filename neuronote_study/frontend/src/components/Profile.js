@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Box, 
     Typography, 
@@ -423,7 +423,13 @@ const Profile = () => {
                 </Grid>
             </Grid>
 
-            <EditProfile open={isEditing} onClose={handleCloseEdit} />
+            {userDetails && (
+                <EditProfile 
+                    open={isEditing} 
+                    onClose={handleCloseEdit} 
+                    userDetails={userDetails}
+                />
+            )}
         </Container>
     ) : (
         <Container maxWidth="lg" sx={{ 

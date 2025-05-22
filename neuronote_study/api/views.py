@@ -136,6 +136,28 @@ class getUserView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class editUsernameView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, new_username):
+        user = request.user
+        if not new_username:
+            return Response({
+                "error": "New username is required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if User.objects.filter(username=new_username).exists():
+                return Response({
+                    "error": "Username already exists"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.username = new_username
+                user.save()
+                return Response({
+                    "message": "Username updated successfully"
+                }, status=status.HTTP_200_OK)
+
+
 class DeleteNoteView(APIView):
     permission_classes = [IsAuthenticated]
 
