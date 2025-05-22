@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('user/', getUserView.as_view(), name='user'),
     path('edit-username/<str:new_username>/', editUsernameView.as_view(), name='edit-username'),
+    path('change-password/', changePasswordView.as_view(), name='change-password'),
     path('delete-note/<int:note_id>/', DeleteNoteView.as_view(), name='delete-note'),
     path('create-notebook-note/', createNotebookNoteView.as_view(), name='create-notebook-note'),
     path('sidebar-notebook-notes/<int:page_number>/', getSidebarNotebookNotesView.as_view(), name='sidebar-notebook-notes'),

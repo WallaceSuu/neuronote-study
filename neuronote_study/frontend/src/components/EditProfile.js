@@ -25,7 +25,8 @@ const EditProfile = ({ open, onClose, userDetails }) => {
         confirmPassword: ''
     });
 
-    const [error, setError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     // Update formData on userDetails change
     useEffect(() => {
@@ -44,35 +45,119 @@ const EditProfile = ({ open, onClose, userDetails }) => {
             ...prev,
             [name]: value
         }));
+        // Clear errors when user starts typing
+        if (name === 'username') setUsernameError('');
+        if (name.includes('Password')) setPasswordError('');
+    };
+
+    const validatePasswordChange = () => {
+        if (!formData.currentPassword) {
+            setPasswordError('Current password is required');
+            return false;
+        }
+        if (!formData.newPassword) {
+            setPasswordError('New password is required');
+            return false;
+        }
+        if (formData.newPassword.length < 8) {
+            setPasswordError('New password must be at least 8 characters long');
+            return false;
+        }
+        if (formData.newPassword === formData.currentPassword) {
+            setPasswordError('New password cannot be the same as the current password');
+            return false;
+        }
+        if (formData.newPassword !== formData.confirmPassword) {
+            setPasswordError('New passwords do not match');
+            return false;
+        }
+        if (formData.newPassword.length > 20) {
+            setPasswordError('New password cannot be longer than 20 characters');
+            return false;
+        }
+        if (formData.newPassword.includes(' ')) {
+            setPasswordError('New password cannot contain spaces');
+            return false;
+        }
+        
+        // Check for password complexity
+        const hasUpperCase = /[A-Z]/.test(formData.newPassword);
+        const hasLowerCase = /[a-z]/.test(formData.newPassword);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword);
+        
+        if (!hasUpperCase || !hasLowerCase || !hasSpecialChar) {
+            setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, and one special character');
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleUsernameChange = async () => {
+        if (formData.username === userDetails.username) return true;
+
+        try {
+            const response = await axios.patch(
+                `${API_ENDPOINTS.EDIT_USERNAME}${formData.username}/`,
+                {},
+                axiosConfig
+            );
+            if (response.status === 200) {
+                return true;
+            }
+        } catch (error) {
+            setUsernameError(error.response?.data?.error || 'Error changing username');
+            return false;
+        }
+    };
+
+    const handlePasswordChange = async () => {
+        if (!formData.currentPassword && !formData.newPassword && !formData.confirmPassword) {
+            return true;
+        }
+
+        if (!validatePasswordChange()) {
+            return false;
+        }
+
+        try {
+            const response = await axios.patch(
+                API_ENDPOINTS.CHANGE_PASSWORD,
+                {
+                    current_password: formData.currentPassword,
+                    new_password: formData.newPassword,
+                    confirm_password: formData.confirmPassword
+                },
+                axiosConfig
+            );
+            if (response.status === 200) {
+                // Clear password fields after successful change
+                setFormData(prev => ({
+                    ...prev,
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                }));
+                return true;
+            }
+        } catch (error) {
+            setPasswordError(error.response?.data?.error || 'Error changing password');
+            return false;
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        
-        // Only send username update if it has changed
-        if (formData.username !== userDetails.username) {
-            try {
-                const response = await axios.patch(
-                    `${API_ENDPOINTS.EDIT_USERNAME}${formData.username}/`,
-                    {},
-                    axiosConfig
-                );
-                if (response.status === 200) {
-                    window.location.reload();
-                    onClose();
-                } else {
-                    setError(response.data.error);
-                }
-            } catch (error) {
-                setError(error.response.data.error);
-            }
-        } else {
+        setUsernameError('');
+        setPasswordError('');
+
+        const usernameSuccess = await handleUsernameChange();
+        const passwordSuccess = await handlePasswordChange();
+
+        if (usernameSuccess && passwordSuccess) {
+            window.location.reload();
             onClose();
         }
-
-        // TODO: Implement password change
-        console.log('Form submitted:', formData);
     };
 
     return (
@@ -99,7 +184,16 @@ const EditProfile = ({ open, onClose, userDetails }) => {
             <form onSubmit={handleSubmit}>
                 <DialogContent dividers>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {error && <Typography variant="subtitle1" sx={{ textAlign: 'center', mt: 2, mb: 1, color: 'red' }}>{error}</Typography>}
+                        {usernameError && (
+                            <Typography variant="subtitle1" sx={{ textAlign: 'center', mt: 2, mb: 1, color: 'red' }}>
+                                {usernameError}
+                            </Typography>
+                        )}
+                        {passwordError && (
+                            <Typography variant="subtitle1" sx={{ textAlign: 'center', mt: 2, mb: 1, color: 'red' }}>
+                                {passwordError}
+                            </Typography>
+                        )}
                         <TextField
                             label="Email"
                             name="email"
@@ -115,6 +209,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             value={formData.username}
                             onChange={handleChange}
                             fullWidth
+                            error={!!usernameError}
                         />
                         <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
                             Change Password
@@ -126,6 +221,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             onChange={handleChange}
                             fullWidth
                             type="password"
+                            error={!!passwordError}
                         />
                         <TextField
                             label="New Password"
@@ -134,6 +230,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             onChange={handleChange}
                             fullWidth
                             type="password"
+                            error={!!passwordError}
                         />
                         <TextField
                             label="Confirm New Password"
@@ -142,6 +239,7 @@ const EditProfile = ({ open, onClose, userDetails }) => {
                             onChange={handleChange}
                             fullWidth
                             type="password"
+                            error={!!passwordError}
                         />
                     </Box>
                 </DialogContent>

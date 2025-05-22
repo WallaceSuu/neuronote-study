@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   LOGOUT: `${API_BASE_URL}/api/logout/`,
   USER: `${API_BASE_URL}/api/user/`,
   EDIT_USERNAME: `${API_BASE_URL}/api/edit-username/`,
+  CHANGE_PASSWORD: `${API_BASE_URL}/api/change-password/`,
   GET_MESSAGES: `${API_BASE_URL}/openai/get-messages/`,
   SEND_MESSAGE: `${API_BASE_URL}/openai/send-message/`,
   CREATE_NOTEBOOK_NOTE: `${API_BASE_URL}/api/create-notebook-note/`,
