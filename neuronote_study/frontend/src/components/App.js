@@ -12,6 +12,7 @@ import Flashcards from "./Flashcards";
 import Profile from "./Profile";
 import ChatPage from "./ChatPage";
 import Notebook from "./Notebook";
+import ForgotPassword from "./ForgotPassword";
 import { Box } from "@mui/material";
 import { ThemeProvider } from "../context/ThemeContext";
 
@@ -40,6 +41,7 @@ const App = () => {
               <Route path="/notebook" element={<Notebook />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<LandingPage />} />

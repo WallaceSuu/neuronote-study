@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import *
 from openAI_api.views import GetNotesView
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('upload-pdf/', uploadPDFView.as_view(), name='upload-pdf'),
@@ -11,7 +12,10 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('user/', getUserView.as_view(), name='user'),
     path('edit-username/<str:new_username>/', editUsernameView.as_view(), name='edit-username'),
-    path('change-password/', changePasswordView.as_view(), name='change-password'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password-reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password-reset-done'),
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password-reset-confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password-reset-complete'),
     path('delete-note/<int:note_id>/', DeleteNoteView.as_view(), name='delete-note'),
     path('create-notebook-note/', createNotebookNoteView.as_view(), name='create-notebook-note'),
     path('sidebar-notebook-notes/<int:page_number>/', getSidebarNotebookNotesView.as_view(), name='sidebar-notebook-notes'),

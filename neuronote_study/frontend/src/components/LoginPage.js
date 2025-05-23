@@ -8,6 +8,7 @@ import {
   Paper,
   useTheme,
 } from "@mui/material";
+import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS, getCSRFToken } from "../config";
@@ -196,6 +197,21 @@ const LoginPage = () => {
                 },
               }}
             />
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: '100%',
+                mt: 1,
+                mb: 2
+            }}>
+              <Button
+                onClick={() => navigate("/forgot-password")}
+                color="primary"
+              >
+                Forgot Password?
+              </Button>
+            </Box>
             <Button
               type="submit"
               fullWidth

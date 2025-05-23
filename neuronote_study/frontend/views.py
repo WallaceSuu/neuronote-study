@@ -30,3 +30,6 @@ def chat(request):
 def notebook(request):
     return render(request, 'frontend/index.html')
 
+def forgot_password(request):
+    return render(request, 'frontend/index.html')
+
