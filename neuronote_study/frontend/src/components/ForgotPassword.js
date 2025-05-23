@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, Box, Alert } from '@mui/material';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config';
+import { API_ENDPOINTS, getCSRFToken } from '../config';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
+import { useThemeContext } from '../context/ThemeContext';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -10,6 +12,8 @@ const ForgotPassword = () => {
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const theme = useTheme();
+    const { isDarkMode } = useThemeContext();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,28 +22,35 @@ const ForgotPassword = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(API_ENDPOINTS.PASSWORD_RESET, { email });
-            if (response.status === 200) {
-                setSuccess('Password reset email has been sent. Please check your inbox.');
-                setEmail('');
-            }
+            const response = await axios.post(
+                `${API_ENDPOINTS.BASE_URL}/api/password-reset/`,
+                { email },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken(),
+                    },
+                }
+            );
+            setSuccess('Password reset link has been sent to your email.');
+            setEmail('');
         } catch (error) {
-            setError(error.response?.data?.error || 'An error occurred. Please try again.');
+            console.error('Password reset error:', error);
+            setError(error.response?.data?.error || 'Failed to send reset link. Please try again.');
         } finally {
             setIsLoading(false);
         }
     }
 
     return (
-        <Container maxWidth="xs">
+        <Container component="main" maxWidth="xs" sx={{ py: 4 }}>
             <Box
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: '100vh',
-                    py: 8,
+                    minHeight: '100%',
                 }}
             >
                 <Typography variant="h4" sx={{ mb: 3 }}>Forgot Password?</Typography>

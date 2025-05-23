@@ -14,6 +14,16 @@ from rest_framework.authtoken.models import Token
 from .serializers import *
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.contrib.auth import views as auth_views
+import logging
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.core.mail import send_mail
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 class uploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
@@ -66,8 +76,6 @@ class RegisterUserView(APIView):
     def post(self, request):
         try:
             data = request.data
-            print(f"Received registration data: {data}")  # Debug log
-            
             username = data.get('username')
             email = data.get('email')
             password = data.get('password')
@@ -109,14 +117,12 @@ class RegisterUserView(APIView):
                     status=status.HTTP_201_CREATED
                 )
             except Exception as create_error:
-                print(f"Error creating user: {str(create_error)}")  # Debug log
                 return Response(
                     {"error": f"Error creating user: {str(create_error)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
         except Exception as e:
-            print(f"Registration failed: {str(e)}")  # Debug log
             return Response(
                 {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -515,3 +521,65 @@ class deleteNotebookPageView(APIView):
             return Response({'error': 'Page not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PasswordResetView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response(
+                {'error': 'Email is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Check if user exists
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                # Don't reveal that the user doesn't exist
+                return Response(
+                    {'message': 'If an account exists with this email, you will receive a password reset link.'},
+                    status=status.HTTP_200_OK
+                )
+
+            # Generate password reset token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Create reset URL
+            reset_url = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            # Send email using send_mail
+            subject = 'Password Reset for Neuronote Study'
+            message = f'Please click the following link to reset your password: {reset_url}'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=from_email,
+                    recipient_list=recipient_list,
+                    fail_silently=False,
+                )
+            except Exception as email_error:
+                logger.error(f"Failed to send email: {str(email_error)}")
+                logger.error(f"Email settings: HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, USER={settings.EMAIL_HOST_USER}")
+                raise
+            
+            return Response(
+                {'message': 'If an account exists with this email, you will receive a password reset link.'},
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            logger.error(f"Error sending password reset email: {str(e)}")
+            return Response(
+                {'error': 'An error occurred while processing your request'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

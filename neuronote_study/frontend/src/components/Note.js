@@ -58,28 +58,20 @@ const Note = ({ selectedNote }) => {
 
   const handleCreateNotebookNote = async (pageNumber, noteId, text) => {
     try {
-      console.log('Creating notebook note with:', { pageNumber, noteId, text });
-      console.log('Selected note:', selectedNote);
-
       const pageNumberInt = parseInt(pageNumber, 10);
       if (isNaN(pageNumberInt)) {
         throw new Error('Invalid page number');
       }
-
-      // Check if noteId is undefined or null
       if (!noteId) {
         throw new Error('Note ID is required');
       }
-
       const noteIdInt = parseInt(noteId, 10);
       if (isNaN(noteIdInt)) {
         throw new Error(`Invalid note ID: ${noteId}`);
       }
-
       if (!text || typeof text !== 'string' || text.trim() === '') {
         throw new Error('Invalid text content');
       }
-
       const response = await axios.post(`${API_ENDPOINTS.CREATE_NOTEBOOK_NOTE}`, {
         page_number: pageNumberInt,
         note: noteIdInt,
@@ -91,7 +83,6 @@ const Note = ({ selectedNote }) => {
           'Content-Type': 'application/json'
         }
       });
-      console.log('Notebook note created:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating notebook note:', error);
@@ -102,7 +93,6 @@ const Note = ({ selectedNote }) => {
   const handleAddToSidebar = async () => {
     if (selection && selectedNote) {
       try {
-        console.log('Selected note in handleAddToSidebar:', selectedNote);
         if (!selectedNote.note_id) {
           throw new Error('Selected note has no ID');
         }
