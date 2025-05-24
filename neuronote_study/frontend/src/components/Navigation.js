@@ -339,8 +339,7 @@ const Navigation = () => {
             >
               {isLoggedIn ? (
                 <>
-                  <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
-                  <MenuItem onClick={handleClose}>My account</MenuItem>
+                  <MenuItem onClick={handleProfileClick}>My Account</MenuItem>
                   <Divider sx={{ borderColor: theme.palette.divider }} />
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </>
