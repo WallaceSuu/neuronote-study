@@ -211,7 +211,7 @@ const LoginPage = () => {
               >
                 Forgot Password?
               </Button>
-            </Box>
+            </Box>  
             <Button
               type="submit"
               fullWidth
