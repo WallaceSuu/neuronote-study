@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   CREATE_NOTEBOOK_PAGE: `${API_BASE_URL}/api/create-notebook-page/`,
   NOTEBOOK_PAGES: `${API_BASE_URL}/api/notebook-pages/`,
   DELETE_NOTEBOOK_PAGE: `${API_BASE_URL}/api/delete-notebook-page`,
+  CHANGE_PASSWORD: `${API_BASE_URL}/api/change-password/`,
 };
 
 export const getCSRFToken = () => {

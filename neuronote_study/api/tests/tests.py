@@ -7,6 +7,9 @@ from django.utils import timezone
 from datetime import timedelta
 from api.models import User, uploadPDF, note, flashcard, notebook_page, notebook_note
 import os
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 User = get_user_model()
 
@@ -20,7 +23,7 @@ class RegistrationTestCase(APITestCase):
             first_name='Test',
             last_name='User'
         )
-        self.register_url = reverse('register')
+        self.register_url = '/api/register/'
         self.valid_data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -136,20 +139,42 @@ class PasswordSetTestCase(APITestCase):
         self.password_set_url = reverse('api-password-reset')
 
     def test_password_set_with_weak_password(self):
-        data = {
-            'email': self.user.email,
-            'password': 'weak'
-        }
+        # First request a password reset
+        data = {'email': self.user.email}
         response = self.client.post(self.password_set_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Get the token from the email
+        token = default_token_generator.make_token(self.user)
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        
+        # Try to set a weak password
+        data = {
+            'uid': uid,
+            'token': token,
+            'new_password': 'weak'
+        }
+        response = self.client.put(self.password_set_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('password', response.data['error'])
     
     def test_change_password_with_wrong_password(self):
-        data = {
-            'email': self.user.email,
-            'password': 'testpassword'
-        }
+        # First request a password reset
+        data = {'email': self.user.email}
         response = self.client.post(self.password_set_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Get the token from the email
+        token = default_token_generator.make_token(self.user)
+        uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+        
+        # Try to set the same password
+        data = {
+            'uid': uid,
+            'token': token,
+            'new_password': 'testpassword'
+        }
+        response = self.client.put(self.password_set_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('password', response.data['error'])
 
@@ -429,9 +454,15 @@ class SecurityTestCase(APITestCase):
         self.assertEqual(len(response.data['pdfs']), 0)  # Should not see other user's PDFs
 
     def test_invalid_token(self):
+        # Remove any existing authentication
+        self.client.force_authenticate(user=None)
+        # Set an invalid token
         self.client.credentials(HTTP_AUTHORIZATION='Token invalid-token')
         response = self.client.get(reverse('user'))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # Check for the standard DRF authentication error format
+        self.assertIn('detail', response.data)
+        self.assertEqual(str(response.data['detail']), 'Invalid token.')
         
         
         

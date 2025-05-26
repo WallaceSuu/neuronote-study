@@ -130,14 +130,14 @@ class RegisterUserView(APIView):
                 )
 
             # Check for duplicate username
-            if User.objects.filter(username=username).exists():
+            if User.objects.filter(username__iexact=username).exists():
                 return Response(
                     {"error": "Username already exists"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
             # Check for duplicate email
-            if User.objects.filter(email=email).exists():
+            if User.objects.filter(email__iexact=email).exists():
                 return Response(
                     {"error": "Email already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -191,6 +191,10 @@ class getUserView(APIView):
 
     def get(self, request):
         try:
+            # Force authentication check
+            if not request.user or not request.user.is_authenticated:
+                raise AuthenticationFailed('Invalid or expired token')
+            
             user = request.user
             serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -716,5 +720,194 @@ class PasswordResetView(APIView):
             logger.error(f"Error sending password reset email: {str(e)}")
             return Response(
                 {'error': 'An error occurred while processing your request'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request):
+        """Handle password reset confirmation"""
+        try:
+            uid = request.data.get('uid')
+            token = request.data.get('token')
+            new_password = request.data.get('new_password')
+            
+            if not all([uid, token, new_password]):
+                return Response(
+                    {'error': {'password': 'Missing required fields'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate password strength
+            if len(new_password) < 8:
+                return Response(
+                    {'error': {'password': 'Password must be at least 8 characters long'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                # Decode the uid to get the user ID
+                user_id = int(uid)
+                user = User.objects.get(pk=user_id)
+            except (ValueError, User.DoesNotExist):
+                return Response(
+                    {'error': {'password': 'Invalid user'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not default_token_generator.check_token(user, token):
+                return Response(
+                    {'error': {'password': 'Invalid or expired token'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check if the new password is the same as the current one
+            if user.check_password(new_password):
+                return Response(
+                    {'error': {'password': 'New password must be different from the current password'}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Set the new password
+            user.set_password(new_password)
+            user.save()
+            
+            return Response(
+                {'message': 'Password has been reset successfully'},
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            logger.error(f"Error resetting password: {str(e)}")
+            return Response(
+                {'error': {'password': 'An error occurred while resetting your password'}},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CreateNoteView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Extract and validate data
+            note_title = request.data.get('note_title')
+            note_text = request.data.get('note_text')
+            pdf_id = request.data.get('pdf_id')
+
+            # Validate required fields
+            if not note_text:
+                return Response(
+                    {"error": "Note text is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get the PDF object
+            try:
+                pdf = uploadPDF.objects.get(id=pdf_id, user=request.user)
+            except uploadPDF.DoesNotExist:
+                return Response(
+                    {"error": "PDF not found or does not belong to user"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Create the note
+            new_note = note.objects.create(
+                note_title=note_title,
+                note_text=note_text,
+                user=request.user,
+                note_key=pdf
+            )
+
+            return Response({
+                "message": "Note created successfully",
+                "note_id": new_note.id,
+                "note_title": new_note.note_title,
+                "note_text": new_note.note_text
+            }, status=status.HTTP_201_CREATED)
+
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error creating note: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ChangePasswordView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        try:
+            current_password = request.data.get('current_password')
+            new_password = request.data.get('new_password')
+            confirm_password = request.data.get('confirm_password')
+
+            # Validate required fields
+            if not all([current_password, new_password, confirm_password]):
+                return Response(
+                    {"error": "All password fields are required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate current password
+            if not request.user.check_password(current_password):
+                return Response(
+                    {"error": "Current password is incorrect"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate password match
+            if new_password != confirm_password:
+                return Response(
+                    {"error": "New passwords do not match"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate password strength
+            if len(new_password) < 8:
+                return Response(
+                    {"error": "Password must be at least 8 characters long"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Check if new password is same as current
+            if current_password == new_password:
+                return Response(
+                    {"error": "New password must be different from current password"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate password complexity
+            has_upper = any(c.isupper() for c in new_password)
+            has_lower = any(c.islower() for c in new_password)
+            has_digit = any(c.isdigit() for c in new_password)
+            has_special = any(not c.isalnum() for c in new_password)
+
+            if not all([has_upper, has_lower, has_digit, has_special]):
+                return Response(
+                    {"error": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update password
+            request.user.set_password(new_password)
+            request.user.save()
+
+            return Response(
+                {"message": "Password changed successfully"},
+                status=status.HTTP_200_OK
+            )
+
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

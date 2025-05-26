@@ -45,7 +45,7 @@ const RegisterPage = () => {
 
     try {
       const response = await axios.post(
-        API_ENDPOINTS.REGISTER,
+        '/api/register/',
         formData,
         axiosConfig
       );

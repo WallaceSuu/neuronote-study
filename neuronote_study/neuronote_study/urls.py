@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from api.views import RegisterUserView
 from neuronote_study.views import LoginUserView
 from django.contrib.auth import views as auth_views
 import logging
@@ -38,7 +37,6 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('openai/', include('openAI_api.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('register/', RegisterUserView.as_view(), name='register'),
     path('api/login/', LoginUserView.as_view(), name='login'),
     path('password-reset/', 
          CustomPasswordResetView.as_view(

@@ -8,7 +8,8 @@ urlpatterns = [
     path('get-user-pdfs/', getUserPDFsView.as_view(), name='get-user-pdfs'),
     path('register/', RegisterUserView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
-    path('notes/', GetNotesView.as_view(), name='notes'),
+    path('notes/', CreateNoteView.as_view(), name='notes'),  # For POST requests
+    path('notes/', GetNotesView.as_view(), name='get-notes'),  # For GET requests
     path('logout/', LogoutView.as_view(), name='logout'),
     path('user/', getUserView.as_view(), name='user'),
     path('edit-username/<str:new_username>/', editUsernameView.as_view(), name='edit-username'),
@@ -22,4 +23,5 @@ urlpatterns = [
     path('notebook-pages/', getNotebookPagesView.as_view(), name='notebook-pages'),
     path('delete-notebook-page/<int:page_id>/', deleteNotebookPageView.as_view(), name='delete-notebook-page'),
     path('password-reset/', PasswordResetView.as_view(), name='api-password-reset'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]

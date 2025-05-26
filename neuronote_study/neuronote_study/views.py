@@ -10,20 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect
 
-class RegisterUserView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        if not username or not email or not password:
-            return Response({"error": "All fields are required"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
-
-        return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
-
 class LoginUserView(APIView):
     def post(self, request):
         username = request.data.get('username')
