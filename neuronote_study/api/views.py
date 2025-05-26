@@ -443,6 +443,21 @@ class updateNotebookNoteView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
+class editNotebookNoteView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request, note_id):
+        user = request.user
+        try:
+            note_obj = notebook_note.objects.get(id=note_id, user=user)
+            note_obj.text = request.data.get('text')
+            note_obj.save()
+            return Response({'message': 'Notebook note updated successfully'}, status=status.HTTP_200_OK)
+        except notebook_note.DoesNotExist:
+            return Response({'error': 'Notebook note not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class createNotebookPageView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
   SIDEBAR_NOTEBOOK_NOTES: `${API_BASE_URL}/api/sidebar-notebook-notes`,
   NOTEBOOK_NOTES: `${API_BASE_URL}/api/notebook-notes`,
   UPDATE_NOTEBOOK_NOTE: `${API_BASE_URL}/api/update-notebook-note`,
+  EDIT_NOTEBOOK_NOTE: `${API_BASE_URL}/api/edit-notebook-note`,
   CREATE_NOTEBOOK_PAGE: `${API_BASE_URL}/api/create-notebook-page/`,
   NOTEBOOK_PAGES: `${API_BASE_URL}/api/notebook-pages/`,
   DELETE_NOTEBOOK_PAGE: `${API_BASE_URL}/api/delete-notebook-page`,

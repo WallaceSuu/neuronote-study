@@ -14,11 +14,17 @@ import {
   FormControl,
   Fade,
   Zoom,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config";
+import EditIcon from '@mui/icons-material/Edit';
 
 const Note = ({ selectedNote }) => {
   const themeContext = useThemeContext();
@@ -298,20 +304,25 @@ const Note = ({ selectedNote }) => {
             flexDirection: "column",
             overflow: "hidden"
           }}>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                mb: 3, 
-                color: theme.palette.text.primary,
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                pb: 2,
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                flexShrink: 0
-              }}
-            >
-              {formatBoldText(selectedNote.note_title)}
-            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              mb: 3,
+              pb: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}>
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  color: theme.palette.text.primary,
+                  fontWeight: 600,
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {formatBoldText(selectedNote.note_title)}
+              </Typography>
+            </Box>
             <Box sx={{ 
               flex: 1,
               overflow: "auto",

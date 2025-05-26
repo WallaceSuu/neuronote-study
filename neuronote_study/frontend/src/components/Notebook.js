@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Container, CircularProgress, Fade } from '@mui/material';
+import { Box, Typography, Paper, Container, CircularProgress, Fade, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import NotebookNavigation from './NotebookNavigation';
@@ -14,6 +16,9 @@ const Notebook = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [draggedNote, setDraggedNote] = useState(null);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editNoteId, setEditNoteId] = useState(null);
+    const [editNoteText, setEditNoteText] = useState('');
     const theme = useTheme();
 
     const fetchTotalPages = async () => {
@@ -186,6 +191,36 @@ const Notebook = () => {
         }
     };
 
+    const handleEditClick = (note) => {
+        setEditNoteId(note.id);
+        setEditNoteText(note.text);
+        setEditDialogOpen(true);
+    };
+
+    const handleEditDialogClose = () => {
+        setEditDialogOpen(false);
+        setEditNoteId(null);
+        setEditNoteText('');
+    };
+
+    const handleEditSave = async () => {
+        try {
+            await axios.patch(`${API_ENDPOINTS.UPDATE_NOTEBOOK_NOTE}/${editNoteId}/`, {
+                text: editNoteText
+            }, {
+                headers: {
+                    'Authorization': `Token ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            setNotes(notes.map(note => note.id === editNoteId ? { ...note, text: editNoteText } : note));
+            handleEditDialogClose();
+        } catch (error) {
+            setError('Failed to update note');
+            console.error('Error updating note:', error);
+        }
+    };
+
     return (
         <Box sx={{ 
             position: 'relative', 
@@ -272,7 +307,7 @@ const Notebook = () => {
                                     left: note.location_x || 0,
                                     top: note.location_y || 0,
                                     zIndex: note.location_z || 0,
-                                    padding: '16px',
+                                    padding: 0,
                                     maxWidth: '300px',
                                     backgroundColor: theme.palette.background.paper,
                                     border: `1px solid ${theme.palette.divider}`,
@@ -291,61 +326,97 @@ const Notebook = () => {
                                     }
                                 }}
                             >
-                                <Box sx={{ 
-                                    position: 'relative',
-                                    '&:hover .delete-button': {
-                                        opacity: 1,
-                                        transform: 'scale(1)',
-                                    }
-                                }}>
+                                {/* Header bar for actions */}
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-end',
+                                        gap: 1,
+                                        backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[200],
+                                        borderTopLeftRadius: '12px',
+                                        borderTopRightRadius: '12px',
+                                        px: 1,
+                                        py: 0.5,
+                                        minHeight: '36px',
+                                    }}
+                                >
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditClick(note);
+                                        }}
+                                        sx={{
+                                            backgroundColor: theme.palette.primary.light,
+                                            color: theme.palette.primary.contrastText,
+                                            opacity: 0.9,
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.primary.main,
+                                                opacity: 1,
+                                            },
+                                            boxShadow: theme.shadows[2],
+                                        }}
+                                    >
+                                        <EditIcon fontSize="small" />
+                                    </IconButton>
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteNote(note.id);
+                                        }}
+                                        sx={{
+                                            backgroundColor: theme.palette.error.light,
+                                            color: theme.palette.error.contrastText,
+                                            opacity: 0.9,
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.error.main,
+                                                opacity: 1,
+                                            },
+                                            boxShadow: theme.shadows[2],
+                                        }}
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                                {/* Note text below header */}
+                                <Box sx={{ p: 2 }}>
                                     <Typography 
                                         variant="body1" 
                                         sx={{ 
                                             color: theme.palette.text.primary,
                                             lineHeight: 1.5,
                                             fontSize: '0.95rem',
+                                            wordBreak: 'break-word',
                                         }}
                                     >
                                         {note.text}
                                     </Typography>
-                                    <Box
-                                        className="delete-button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteNote(note.id);
-                                        }}
-                                        sx={{
-                                            position: 'absolute',
-                                            top: -12,
-                                            right: -12,
-                                            width: 24,
-                                            height: 24,
-                                            borderRadius: '50%',
-                                            backgroundColor: theme.palette.error.light,
-                                            color: theme.palette.error.contrastText,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            opacity: 0,
-                                            transform: 'scale(0.8)',
-                                            transition: 'all 0.2s ease-in-out',
-                                            fontSize: '16px',
-                                            fontWeight: 'bold',
-                                            boxShadow: theme.shadows[2],
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.error.main,
-                                                transform: 'scale(1.1)',
-                                            }
-                                        }}
-                                    >
-                                        ×
-                                    </Box>
                                 </Box>
                             </Paper>
                         </Fade>
                     ))
                 )}
+                <Dialog open={editDialogOpen} onClose={handleEditDialogClose} maxWidth="sm" fullWidth>
+                    <DialogTitle>Edit Note</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            multiline
+                            fullWidth
+                            rows={8}
+                            value={editNoteText}
+                            onChange={(e) => setEditNoteText(e.target.value)}
+                            sx={{ mt: 2 }}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleEditDialogClose}>Cancel</Button>
+                        <Button onClick={handleEditSave} variant="contained" color="primary">
+                            Save Changes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </Box>
     );
