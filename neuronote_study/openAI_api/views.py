@@ -57,8 +57,17 @@ class createNoteView(APIView):
             
             # Generate summary using OpenAI
             try:
-                note_text = generate_summary_and_title(pdf)["text"]
-                note_title = generate_summary_and_title(pdf)["title"]
+                # First check if we can extract text from the PDF
+                pdf_text = extract_text_from_pdf(pdf.pdf_file.path)
+                if not pdf_text.strip():
+                    return Response({
+                        'status': 'error',
+                        'message': 'Could not extract text from PDF'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                note_data = generate_summary_and_title(pdf)
+                note_text = note_data["text"]
+                note_title = note_data["title"]
             except Exception as e:
                 return Response({
                     'status': 'error',

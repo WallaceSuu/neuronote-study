@@ -22,52 +22,90 @@ from django.utils.encoding import force_bytes
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.exceptions import AuthenticationFailed
 
 logger = logging.getLogger(__name__)
 
 class uploadPDFView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        pdf_file = request.FILES.get('pdf_file')
-        if not pdf_file:
-            return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        upload_dir =  "media/uploads/"
-        os.makedirs(upload_dir, exist_ok=True)
+        try:
+            pdf_file = request.FILES.get('pdf_file')
+            if not pdf_file:
+                return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            upload_dir = "media/uploads/"
+            os.makedirs(upload_dir, exist_ok=True)
 
-        file_path = os.path.join(upload_dir, pdf_file.name)
-        with open(file_path, 'wb+') as destination:
-            for chunk in pdf_file.chunks():
-                destination.write(chunk)
+            file_path = os.path.join(upload_dir, pdf_file.name)
+            with open(file_path, 'wb+') as destination:
+                for chunk in pdf_file.chunks():
+                    destination.write(chunk)
 
-        # Adding the uploaded file to the django database with user association
-        new_upload = uploadPDF(pdf_file=pdf_file, pdf_name=pdf_file.name, user=request.user)
-        new_upload.save()
-        
-        # Process the PDF to generate notes
-        process_view = ProcessPDFsView()
-        process_response = process_view.post(request)
-        
-        if process_response.status_code != status.HTTP_200_OK:
+            # Adding the uploaded file to the django database with user association
+            new_upload = uploadPDF(pdf_file=pdf_file, pdf_name=pdf_file.name, user=request.user)
+            new_upload.save()
+            
+            # Process the PDF to generate notes
+            process_view = ProcessPDFsView()
+            process_response = process_view.post(request)
+            
+            if process_response.status_code != status.HTTP_200_OK:
+                return Response({
+                    "message": "File uploaded successfully but note generation failed",
+                    "error": process_response.data
+                }, status=status.HTTP_200_OK)
+            
             return Response({
-                "message": "File uploaded successfully but note generation failed",
-                "error": process_response.data
+                "message": "File uploaded and processed successfully",
+                "note_generation": process_response.data
             }, status=status.HTTP_200_OK)
-        
-        return Response({
-            "message": "File uploaded and processed successfully",
-            "note_generation": process_response.data
-        }, status=status.HTTP_200_OK)
+            
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class getUserPDFsView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        pdfs = uploadPDF.objects.filter(user=user)
-        serializer = UploadPDFSerializer(pdfs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            # Get only PDFs belonging to the authenticated user
+            user = request.user
+            pdfs = uploadPDF.objects.filter(user=user).order_by('-created_at')
+            
+            # Serialize the PDFs
+            pdf_data = [{
+                'pdf_id': pdf.pdf_key,
+                'pdf_name': pdf.pdf_name,
+                'created_at': pdf.created_at,
+                'file_url': request.build_absolute_uri(pdf.pdf_file.url) if pdf.pdf_file else None
+            } for pdf in pdfs]
+            
+            return Response({
+                'status': 'success',
+                'pdfs': pdf_data
+            }, status=status.HTTP_200_OK)
+            
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -82,26 +120,37 @@ class RegisterUserView(APIView):
             first_name = data.get('first_name')
             last_name = data.get('last_name')
 
+            # Check for missing fields
             if not all([username, email, password, first_name, last_name]):
                 missing_fields = [field for field in ['username', 'email', 'password', 'first_name', 'last_name'] 
                                 if not data.get(field)]
                 return Response(
-                    {"error": f"All fields are required. Missing fields: {', '.join(missing_fields)}"},
+                    {"error": f"Missing required fields: {', '.join(missing_fields)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Check for duplicate username
             if User.objects.filter(username=username).exists():
                 return Response(
                     {"error": "Username already exists"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Check for duplicate email
             if User.objects.filter(email=email).exists():
                 return Response(
                     {"error": "Email already exists"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Validate password strength
+            if len(password) < 8:
+                return Response(
+                    {"error": "Password must be at least 8 characters long"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Create the user
             try:
                 user = User.objects.create_user(
                     username=username,
@@ -137,45 +186,70 @@ class LogoutView(APIView):
         return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
 
 class getUserView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            user = request.user
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class editUsernameView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, new_username):
-        user = request.user
-        if not new_username:
-            return Response({
-                "error": "New username is required"
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Check if username has been changed in the last week
-        if user.last_username_change:
-            one_week_ago = timezone.now() - timedelta(days=7)
-            if user.last_username_change > one_week_ago:
-                days_left = 7 - (timezone.now() - user.last_username_change).days
+        try:
+            user = request.user
+            if not new_username:
                 return Response({
-                    "error": f"You can only change your username once a week. Try again in {days_left} days."
+                    "error": "New username is required"
                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if username has been changed in the last week
+            if user.last_username_change:
+                one_week_ago = timezone.now() - timedelta(days=7)
+                if user.last_username_change > one_week_ago:
+                    days_left = 7 - (timezone.now() - user.last_username_change).days
+                    return Response({
+                        "error": f"You can only change your username once a week. Try again in {days_left} days."
+                    }, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(username__iexact=new_username).exists():
-            return Response({
-                "error": "Username already exists"
-            }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            user.username = new_username
-            user.last_username_change = timezone.now()
-            user.save()
-            return Response({
-                "message": "Username updated successfully"
-            }, status=status.HTTP_200_OK)
+            if User.objects.filter(username__iexact=new_username).exists():
+                return Response({
+                    "error": "Username already exists"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.username = new_username
+                user.last_username_change = timezone.now()
+                user.save()
+                return Response({
+                    "message": "Username updated successfully"
+                }, status=status.HTTP_200_OK)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class DeleteNoteView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, note_id):
@@ -191,6 +265,11 @@ class DeleteNoteView(APIView):
             
             return Response({"message": "Note deleted successfully"}, status=status.HTTP_200_OK)
             
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except note.DoesNotExist:
             return Response({
                 'status': 'error',
@@ -232,11 +311,12 @@ class LoginView(APIView):
             )
 
 class createNotebookNoteView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user = request.user
         try:
+            user = request.user
             # Extract and validate data
             page_number = request.data.get('page_number')
             note_id = request.data.get('note')
@@ -305,6 +385,11 @@ class createNotebookNoteView(APIView):
                 "page_number": page_number
             }, status=status.HTTP_201_CREATED)
 
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception as e:
             return Response(
                 {"error": f"Error creating notebook note: {str(e)}"},
@@ -312,11 +397,12 @@ class createNotebookNoteView(APIView):
             )
 
 class getSidebarNotebookNotesView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, page_number):
-        user = request.user
         try:
+            user = request.user
             try:
                 page_number = int(page_number)
             except (TypeError, ValueError):
@@ -339,6 +425,11 @@ class getSidebarNotebookNotesView(APIView):
             )
             serializer = NotebookNoteSerializer(notebook_notes, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception as e:
             return Response(
                 {"error": str(e)},
@@ -346,11 +437,12 @@ class getSidebarNotebookNotesView(APIView):
             )
 
 class getNotebookNotesView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, page_number):
-        user = request.user
         try:
+            user = request.user
             try:
                 page_number = int(page_number)
             except (TypeError, ValueError):
@@ -378,6 +470,11 @@ class getNotebookNotesView(APIView):
             )
             serializer = NotebookNoteSerializer(notebook_notes, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception as e:
             return Response(
                 {"error": str(e)},
@@ -385,11 +482,12 @@ class getNotebookNotesView(APIView):
             )
 
 class updateNotebookNoteView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, note_id):
-        user = request.user
         try:
+            user = request.user
             # Get the notebook note and verify ownership through notebook_page
             notebook_note_obj = notebook_note.objects.get(
                 id=note_id,
@@ -423,6 +521,11 @@ class updateNotebookNoteView(APIView):
                 'location_z': notebook_note_obj.location_z,
                 'sidebar': notebook_note_obj.sidebar
             })
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except notebook_note.DoesNotExist:
             return Response({'error': 'Notebook note not found'}, status=404)
         except Exception as e:
@@ -459,11 +562,12 @@ class editNotebookNoteView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class createNotebookPageView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        user = request.user
         try:
+            user = request.user
             page_title = request.data.get('page_title')
             page_number = request.data.get('page_number')
             notebook_page_obj = notebook_page.objects.create(
@@ -472,15 +576,21 @@ class createNotebookPageView(APIView):
                 page_number=page_number
             )
             return Response({'message': 'Notebook page created successfully'}, status=status.HTTP_201_CREATED)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class getNotebookPagesView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
         try:
+            user = request.user
             # Get all pages for the user
             pages = notebook_page.objects.filter(user=user).order_by('page_number')
             total_pages = pages.count()
@@ -496,6 +606,11 @@ class getNotebookPagesView(APIView):
                 'total_pages': total_pages,
                 'pages': pages_data
             }, status=status.HTTP_200_OK)
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except Exception as e:
             return Response(
                 {"error": str(e)},
@@ -503,6 +618,7 @@ class getNotebookPagesView(APIView):
             )
 
 class deleteNotebookPageView(APIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, page_id):
@@ -531,7 +647,11 @@ class deleteNotebookPageView(APIView):
                 'deleted_page_number': deleted_page_number,
                 'next_page_number': deleted_page_number if deleted_page_number > 1 else 1
             }, status=status.HTTP_200_OK)
-            
+        except AuthenticationFailed:
+            return Response(
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         except notebook_page.DoesNotExist:
             return Response({'error': 'Page not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

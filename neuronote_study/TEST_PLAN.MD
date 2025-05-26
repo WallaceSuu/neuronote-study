@@ -4,8 +4,8 @@ Authentication & User Management
     Login with wrong credentials (should show error). ✓
     Password reset with non-existent email (should show generic success message). ✓
     Password reset with valid email (should send email). ✓
-    Change password with wrong current password (should show error). 
-    Change password to a weak password (should show error).
+    Change password with wrong current password (should show error). ✓
+    Change password to a weak password (should show error). ✓
     Change username to an existing username (should show error). ✓
     Change username more than once per week (should show error). ✓
 PDF Upload & Processing
