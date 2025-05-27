@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'neuronote_study.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600
     )
 }
