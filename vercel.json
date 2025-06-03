@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd neuronote_study/frontend && npm install && npm run build",
-  "outputDirectory": "neuronote_study/frontend/build",
-  "framework": "create-react-app"
-} 
