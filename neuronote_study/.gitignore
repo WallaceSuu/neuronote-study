@@ -153,3 +153,4 @@ docs/_build/
 .VSCodeCounter/*.csv
 .VSCodeCounter/*.md
 .VSCodeCounter/*.json 
+.vercel
