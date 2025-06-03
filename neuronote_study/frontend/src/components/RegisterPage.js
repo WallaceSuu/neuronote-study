@@ -45,9 +45,15 @@ const RegisterPage = () => {
 
     try {
       const response = await axios.post(
-        '/api/register/',
+        API_ENDPOINTS.REGISTER,
         formData,
-        axiosConfig
+        {
+          ...axiosConfig,
+          headers: {
+            ...axiosConfig.headers,
+            "Authorization": undefined
+          }
+        }
       );
       if (response.status === 201) {
         navigate("/login");
