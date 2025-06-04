@@ -45,6 +45,9 @@ const RegisterPage = () => {
 
     // Create a copy of formData without confirmPassword
     const { confirmPassword, ...registrationData } = formData;
+    
+    // Log the data being sent
+    console.log('Sending registration data:', registrationData);
 
     try {
       const response = await axios.post(
@@ -62,6 +65,7 @@ const RegisterPage = () => {
         navigate("/login");
       }
     } catch (error) {
+      console.error('Registration error:', error.response?.data);  // Log the error response
       setError(error.response?.data?.error || "Registration failed. Please try again.");
     }
   };
