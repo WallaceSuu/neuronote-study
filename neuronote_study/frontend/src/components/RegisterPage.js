@@ -57,7 +57,9 @@ const RegisterPage = () => {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": window.location.origin
           }
         }
       );
@@ -66,7 +68,11 @@ const RegisterPage = () => {
       }
     } catch (error) {
       console.error('Registration error:', error.response?.data);  // Log the error response
-      setError(error.response?.data?.error || "Registration failed. Please try again.");
+      if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     }
   };
 
