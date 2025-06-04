@@ -43,10 +43,13 @@ const RegisterPage = () => {
       return;
     }
 
+    // Create a copy of formData without confirmPassword
+    const { confirmPassword, ...registrationData } = formData;
+
     try {
       const response = await axios.post(
         API_ENDPOINTS.REGISTER,
-        formData,
+        registrationData,
         {
           withCredentials: true,
           headers: {

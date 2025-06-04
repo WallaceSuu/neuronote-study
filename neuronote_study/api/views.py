@@ -114,6 +114,8 @@ class RegisterUserView(APIView):
     def post(self, request):
         try:
             data = request.data
+            logger.info(f"Registration attempt with data: {data}")  # Log the incoming data
+            
             username = data.get('username')
             email = data.get('email')
             password = data.get('password')
@@ -124,6 +126,7 @@ class RegisterUserView(APIView):
             if not all([username, email, password, first_name, last_name]):
                 missing_fields = [field for field in ['username', 'email', 'password', 'first_name', 'last_name'] 
                                 if not data.get(field)]
+                logger.error(f"Missing fields: {missing_fields}")  # Log missing fields
                 return Response(
                     {"error": f"Missing required fields: {', '.join(missing_fields)}"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -131,6 +134,7 @@ class RegisterUserView(APIView):
 
             # Check for duplicate username
             if User.objects.filter(username__iexact=username).exists():
+                logger.error(f"Username already exists: {username}")  # Log duplicate username
                 return Response(
                     {"error": "Username already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -138,6 +142,7 @@ class RegisterUserView(APIView):
 
             # Check for duplicate email
             if User.objects.filter(email__iexact=email).exists():
+                logger.error(f"Email already exists: {email}")  # Log duplicate email
                 return Response(
                     {"error": "Email already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -145,6 +150,7 @@ class RegisterUserView(APIView):
 
             # Validate password strength
             if len(password) < 8:
+                logger.error("Password too short")  # Log password length issue
                 return Response(
                     {"error": "Password must be at least 8 characters long"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -160,18 +166,21 @@ class RegisterUserView(APIView):
                     last_name=last_name
                 )
                 user.save()
+                logger.info(f"User registered successfully: {username}")  # Log successful registration
                 
                 return Response(
                     {"message": "User registered successfully"},
                     status=status.HTTP_201_CREATED
                 )
             except Exception as create_error:
+                logger.error(f"Error creating user: {str(create_error)}")  # Log creation error
                 return Response(
                     {"error": f"Error creating user: {str(create_error)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
         except Exception as e:
+            logger.error(f"Registration failed: {str(e)}")  # Log general error
             return Response(
                 {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
