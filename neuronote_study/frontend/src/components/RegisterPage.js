@@ -58,8 +58,7 @@ const RegisterPage = () => {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-            "Origin": window.location.origin
+            "X-Requested-With": "XMLHttpRequest"
           }
         }
       );
