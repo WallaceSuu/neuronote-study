@@ -66,11 +66,25 @@ const RegisterPage = () => {
         navigate("/login");
       }
     } catch (error) {
-      console.error('Registration error:', error.response?.data);  // Log the error response
-      if (error.response?.data?.error) {
-        setError(error.response.data.error);
+      console.error('Registration error:', error.response);  // Log the full error response
+      
+      // Handle different types of errors
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (error.response.data && typeof error.response.data === 'object') {
+          setError(error.response.data.error || "Registration failed. Please try again.");
+        } else if (typeof error.response.data === 'string') {
+          setError(error.response.data);
+        } else {
+          setError("Registration failed. Please try again.");
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError("No response from server. Please check your internet connection.");
       } else {
-        setError("Registration failed. Please try again.");
+        // Something happened in setting up the request that triggered an Error
+        setError("An error occurred while setting up the request.");
       }
     }
   };
