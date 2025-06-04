@@ -148,6 +148,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "https://neuronote-study.vercel.app",
     "https://neuronote-study.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = False
@@ -170,9 +172,11 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'content-disposition',
+    'content-length',
 ]
 
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken', 'Content-Disposition']
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
 
 # CSRF settings

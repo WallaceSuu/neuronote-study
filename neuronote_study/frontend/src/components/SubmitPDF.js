@@ -112,8 +112,10 @@ const SubmitPDF = () => {
         headers: {
           ...axiosConfig.headers,
           "Content-Type": "multipart/form-data",
-          "Authorization": `Token ${token}`
+          "Authorization": `Token ${token}`,
+          "Accept": "application/json",
         },
+        withCredentials: true,
       });
       navigate("/notes");
     } catch (error) {
@@ -122,8 +124,10 @@ const SubmitPDF = () => {
         alert("Your session has expired. Please log in again.");
         localStorage.removeItem("authToken");
         navigate("/login");
+      } else if (error.response && error.response.status === 502) {
+        alert("Server is temporarily unavailable. Please try again later.");
       } else {
-        alert("Failed to upload PDF");
+        alert("Failed to upload PDF. Please try again.");
       }
       setIsLoading(false);
     }
