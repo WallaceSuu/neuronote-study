@@ -24,6 +24,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -111,32 +113,34 @@ class getUserPDFsView(APIView):
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []  # Disable authentication for registration
-    renderer_classes = [JSONRenderer]  # Force JSON responses
+    renderer_classes = [JSONRenderer]
+    parser_classes = [JSONParser]
     
     def post(self, request):
         try:
             data = request.data
             logger.info(f"Registration attempt with data: {data}")  # Log the incoming data
             
-            username = data.get('username')
-            email = data.get('email')
-            password = data.get('password')
-            first_name = data.get('first_name')
-            last_name = data.get('last_name')
-
-            # Check for missing fields
-            if not all([username, email, password, first_name, last_name]):
-                missing_fields = [field for field in ['username', 'email', 'password', 'first_name', 'last_name'] 
-                                if not data.get(field)]
-                logger.error(f"Missing fields: {missing_fields}")  # Log missing fields
+            # Validate required fields
+            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            
+            if missing_fields:
+                logger.error(f"Missing fields: {missing_fields}")
                 return Response(
                     {"error": f"Missing required fields: {', '.join(missing_fields)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            username = data['username']
+            email = data['email']
+            password = data['password']
+            first_name = data['first_name']
+            last_name = data['last_name']
+
             # Check for duplicate username
             if User.objects.filter(username__iexact=username).exists():
-                logger.error(f"Username already exists: {username}")  # Log duplicate username
+                logger.error(f"Username already exists: {username}")
                 return Response(
                     {"error": "Username already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -144,7 +148,7 @@ class RegisterUserView(APIView):
 
             # Check for duplicate email
             if User.objects.filter(email__iexact=email).exists():
-                logger.error(f"Email already exists: {email}")  # Log duplicate email
+                logger.error(f"Email already exists: {email}")
                 return Response(
                     {"error": "Email already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -152,7 +156,7 @@ class RegisterUserView(APIView):
 
             # Validate password strength
             if len(password) < 8:
-                logger.error("Password too short")  # Log password length issue
+                logger.error("Password too short")
                 return Response(
                     {"error": "Password must be at least 8 characters long"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -168,23 +172,29 @@ class RegisterUserView(APIView):
                     last_name=last_name
                 )
                 user.save()
-                logger.info(f"User registered successfully: {username}")  # Log successful registration
+                logger.info(f"User registered successfully: {username}")
                 
                 return Response(
                     {"message": "User registered successfully"},
                     status=status.HTTP_201_CREATED
                 )
-            except Exception as create_error:
-                logger.error(f"Error creating user: {str(create_error)}")  # Log creation error
+            except ValidationError as ve:
+                logger.error(f"Validation error creating user: {str(ve)}")
                 return Response(
-                    {"error": f"Error creating user: {str(create_error)}"},
+                    {"error": str(ve)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as create_error:
+                logger.error(f"Error creating user: {str(create_error)}")
+                return Response(
+                    {"error": "Error creating user account"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
         except Exception as e:
-            logger.error(f"Registration failed: {str(e)}")  # Log general error
+            logger.error(f"Registration failed: {str(e)}")
             return Response(
-                {"error": f"Registration failed: {str(e)}"},
+                {"error": "An unexpected error occurred during registration"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
