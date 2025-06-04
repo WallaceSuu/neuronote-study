@@ -24,8 +24,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -113,34 +111,32 @@ class getUserPDFsView(APIView):
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []  # Disable authentication for registration
-    renderer_classes = [JSONRenderer]
-    parser_classes = [JSONParser]
+    renderer_classes = [JSONRenderer]  # Force JSON responses
     
     def post(self, request):
         try:
             data = request.data
-            logger.info(f"Registration attempt with data: {data}")  # Log the incoming data
+            logger.info(f"Registration attempt with data: {data}")
             
-            # Validate required fields
-            required_fields = ['username', 'email', 'password', 'first_name', 'last_name']
-            missing_fields = [field for field in required_fields if not data.get(field)]
-            
-            if missing_fields:
-                logger.error(f"Missing fields: {missing_fields}")
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+            first_name = data.get('first_name')
+            last_name = data.get('last_name')
+
+            # Check for missing fields
+            if not all([username, email, password, first_name, last_name]):
+                missing_fields = [field for field in ['username', 'email', 'password', 'first_name', 'last_name'] 
+                                if not data.get(field)]
+                logger.error(f"Missing fields: {missing_fields}")  # Log missing fields
                 return Response(
                     {"error": f"Missing required fields: {', '.join(missing_fields)}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            username = data['username']
-            email = data['email']
-            password = data['password']
-            first_name = data['first_name']
-            last_name = data['last_name']
-
             # Check for duplicate username
             if User.objects.filter(username__iexact=username).exists():
-                logger.error(f"Username already exists: {username}")
+                logger.error(f"Username already exists: {username}")  # Log duplicate username
                 return Response(
                     {"error": "Username already exists"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -177,12 +173,6 @@ class RegisterUserView(APIView):
                 return Response(
                     {"message": "User registered successfully"},
                     status=status.HTTP_201_CREATED
-                )
-            except ValidationError as ve:
-                logger.error(f"Validation error creating user: {str(ve)}")
-                return Response(
-                    {"error": str(ve)},
-                    status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as create_error:
                 logger.error(f"Error creating user: {str(create_error)}")

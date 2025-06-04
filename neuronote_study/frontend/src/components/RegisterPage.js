@@ -58,17 +58,21 @@ const RegisterPage = () => {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": window.location.origin
           }
         }
       );
+      
+      console.log('Registration response:', response);
+      
       if (response.status === 201) {
         navigate("/login");
       }
     } catch (error) {
-      console.error('Registration error:', error.response);  // Log the full error response
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response);
       
-      // Handle different types of errors
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
