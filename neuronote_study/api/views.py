@@ -24,6 +24,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
 
 logger = logging.getLogger(__name__)
 
@@ -112,11 +113,15 @@ class RegisterUserView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []  # Disable authentication for registration
     renderer_classes = [JSONRenderer]  # Force JSON responses
+    parser_classes = [JSONParser]  # Force JSON parsing
     
     def post(self, request):
         try:
+            logger.info(f"Request content type: {request.content_type}")
+            logger.info(f"Request headers: {request.headers}")
+            logger.info(f"Request body: {request.body}")
             data = request.data
-            logger.info(f"Registration attempt with data: {data}")
+            logger.info(f"Parsed data: {data}")
             
             username = data.get('username')
             email = data.get('email')

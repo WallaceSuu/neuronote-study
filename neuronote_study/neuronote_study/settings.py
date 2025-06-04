@@ -31,7 +31,12 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-t5ly*se&n89j-26g#5@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "neuronote-study.vercel.app",
+    "neuronote-study.onrender.com",
+]
 
 # Application definition
 
@@ -141,12 +146,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://neuronote-study.vercel.app",
     "https://neuronote-study.onrender.com",
 ]
 
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -172,7 +176,12 @@ CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000,https://neuronote-study.vercel.app,https://neuronote-study.onrender.com').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://neuronote-study.vercel.app",
+    "https://neuronote-study.onrender.com",
+]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
@@ -190,6 +199,12 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
     ],
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
     'UNAUTHENTICATED_USER': None,
@@ -207,3 +222,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Add security settings
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
