@@ -1,6 +1,5 @@
 // API Configuration
-//export const API_BASE_URL = process.env.REACT_APP_API_URL || "";
-export const API_BASE_URL = "https://neuronote-study.onrender.com";
+export const API_BASE_URL = process.env.REACT_APP_API_URL || "https://neuronote-study.onrender.com";
 // API Endpoints for more modularity
 export const API_ENDPOINTS = {
   BASE_URL: API_BASE_URL,
