@@ -48,10 +48,10 @@ const RegisterPage = () => {
         API_ENDPOINTS.REGISTER,
         formData,
         {
-          ...axiosConfig,
+          withCredentials: true,
           headers: {
-            ...axiosConfig.headers,
-            "Authorization": undefined
+            "Content-Type": "application/json",
+            "Accept": "application/json"
           }
         }
       );
