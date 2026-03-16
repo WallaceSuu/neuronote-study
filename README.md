@@ -47,11 +47,18 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 
 ## Demo / Screenshots
 
-| [**Live app**](https://neuronote-study.vercel.app) |
-|----------------------------------------------------|
-| Try the full app: upload a PDF, get AI summaries, generate flashcards, and chat per note. |
+**[→ Live app](https://neuronote-study.vercel.app)** — Try it in the browser.
 
-*Screenshots (e.g. landing, notes, flashcards) can be added below.*
+| | |
+|---|---|
+| **Landing** | **Register** |
+| ![Landing page](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/landing_page.png "Neuronote Study landing page") | ![Register account](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/register_account.png "Register account") |
+| **Submit PDF** | **Notes** |
+| ![Submit PDF](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/submit_pdf.png "Upload PDF and get AI summary") | ![Notes](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/notes.png "Notes list") |
+| **Chat** | **Flashcards** |
+| ![Chat](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/chat.png "Per-note AI chat") | ![Flashcards](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/flashcards.png "Flashcards") |
+| **About** | |
+| ![About](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/about.png "About page") | |
 
 ---
 
