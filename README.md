@@ -34,14 +34,14 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 
 ## Key Features
 
-| Area | Features |
-|------|----------|
+| Area               | Features                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Auth & profile** | Register, login, logout; token + session auth; password reset via email; change password (with strength rules); edit username (rate-limited to once per week) |
-| **PDFs & notes** | Upload PDF (client-side type/size checks); auto-extract text and create note with AI summary + title; list and delete notes; notes tied to user and PDF |
-| **Flashcards** | Generate one multiple-choice flashcard per note (question + 5 options); list by note; select answer and see correct/incorrect |
-| **Chat** | Per-note chat; conversation history stored in DB; assistant system prompt includes note content for context-aware answers |
-| **Notebook** | Create pages; add notes to a page (sidebar or on-page); update position and text; delete pages (with page-number reordering) |
-| **UI** | Dark/light theme with persistence; responsive layout; centralized API config and auth headers |
+| **PDFs & notes**   | Upload PDF (client-side type/size checks); auto-extract text and create note with AI summary + title; list and delete notes; notes tied to user and PDF       |
+| **Flashcards**     | Generate one multiple-choice flashcard per note (question + 5 options); list by note; select answer and see correct/incorrect                                 |
+| **Chat**           | Per-note chat; conversation history stored in DB; assistant system prompt includes note content for context-aware answers                                     |
+| **Notebook**       | Create pages; add notes to a page (sidebar or on-page); update position and text; delete pages (with page-number reordering)                                  |
+| **UI**             | Dark/light theme with persistence; responsive layout; centralized API config and auth headers                                                                 |
 
 ---
 
@@ -49,27 +49,27 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 
 **[→ Live app](https://neuronote-study.vercel.app)** — Try it in the browser.
 
-| | |
-|---|---|
-| **Landing** | **Register** |
+|                                                                                                                                            |                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Landing**                                                                                                                                | **Register**                                                                                                                           |
 | ![Landing page](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/landing_page.png "Neuronote Study landing page") | ![Register account](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/register_account.png "Register account") |
-| **Submit PDF** | **Notes** |
-| ![Submit PDF](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/submit_pdf.png "Upload PDF and get AI summary") | ![Notes](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/notes.png "Notes list") |
-| **Chat** | **Flashcards** |
-| ![Chat](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/chat.png "Per-note AI chat") | ![Flashcards](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/flashcards.png "Flashcards") |
-| **About** | |
-| ![About](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/about.png "About page") | |
+| **Submit PDF**                                                                                                                             | **Notes**                                                                                                                              |
+| ![Submit PDF](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/submit_pdf.png "Upload PDF and get AI summary")    | ![Notes](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/notes.png "Notes list")                             |
+| **Chat**                                                                                                                                   | **Flashcards**                                                                                                                         |
+| ![Chat](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/chat.png "Per-note AI chat")                             | ![Flashcards](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/flashcards.png "Flashcards")                   |
+| **About**                                                                                                                                  | **Login**                                                                                                                               |
+| ![About](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/about.png "About page")                                 | ![Login](https://github.com/WallaceSuu/neuronote-study/raw/main/screenshots/images/login.png "Login page")                              |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technologies |
-|-------|----------------|
-| **Backend** | Django 4.2, Django REST Framework, Token + Session auth, custom User model |
-| **Database** | SQLite (default), PostgreSQL via `DATABASE_URL` |
-| **AI** | OpenAI API (GPT-4o-mini), pdfplumber for PDF text extraction |
-| **Frontend** | React, React Router, Material UI (MUI), Emotion, Framer Motion, Axios, Webpack |
+| Layer             | Technologies                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Backend**       | Django 4.2, Django REST Framework, Token + Session auth, custom User model                                  |
+| **Database**      | SQLite (default), PostgreSQL via `DATABASE_URL`                                                             |
+| **AI**            | OpenAI API (GPT-4o-mini), pdfplumber for PDF text extraction                                                |
+| **Frontend**      | React, React Router, Material UI (MUI), Emotion, Framer Motion, Axios, Webpack                              |
 | **DevOps / prod** | python-dotenv, dj-database-url, django-cors-headers, WhiteNoise, Gunicorn; optional SMTP for password reset |
 
 ---
@@ -117,12 +117,14 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 ## Setup / Installation
 
 1. **Clone and enter the repo**
+
    ```bash
    git clone <repo-url>
    cd neuronote-study
    ```
 
 2. **Python environment**
+
    ```bash
    python -m venv venv
    # Windows:
@@ -145,6 +147,7 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
    For the **frontend**, copy `neuronote_study/frontend/.env.example` to `neuronote_study/frontend/.env` and set `REACT_APP_API_URL` if you need to point at a different backend (e.g. `http://localhost:8000`).
 
 4. **Database**
+
    ```bash
    python manage.py migrate
    ```
@@ -163,9 +166,11 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 ## How to Run
 
 - **Backend (from repo root):**
+
   ```bash
   python manage.py runserver
   ```
+
   Serves the API and the built frontend at the same origin (e.g. `http://127.0.0.1:8000/`).
 
 - **Frontend dev server (optional):**  
@@ -175,16 +180,16 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes (for AI features) | OpenAI API key |
-| `DJANGO_SECRET_KEY` | No | Django secret (default has a dev fallback) |
-| `DJANGO_DEBUG` | No | Set to `True` for debug mode |
-| `DJANGO_ALLOWED_HOSTS` | No | Comma-separated hosts (default includes localhost) |
-| `DATABASE_URL` | No | DB URL (default SQLite) |
-| `CORS_ALLOWED_ORIGINS` / `CSRF_TRUSTED_ORIGINS` | No | Allowed origins for CORS/CSRF |
-| `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` | No | SMTP for password reset |
-| `REACT_APP_API_URL` (frontend `.env`) | No | Backend base URL (default empty = same origin) |
+| Variable                                        | Required              | Description                                        |
+| ----------------------------------------------- | --------------------- | -------------------------------------------------- |
+| `OPENAI_API_KEY`                                | Yes (for AI features) | OpenAI API key                                     |
+| `DJANGO_SECRET_KEY`                             | No                    | Django secret (default has a dev fallback)         |
+| `DJANGO_DEBUG`                                  | No                    | Set to `True` for debug mode                       |
+| `DJANGO_ALLOWED_HOSTS`                          | No                    | Comma-separated hosts (default includes localhost) |
+| `DATABASE_URL`                                  | No                    | DB URL (default SQLite)                            |
+| `CORS_ALLOWED_ORIGINS` / `CSRF_TRUSTED_ORIGINS` | No                    | Allowed origins for CORS/CSRF                      |
+| `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD`       | No                    | SMTP for password reset                            |
+| `REACT_APP_API_URL` (frontend `.env`)           | No                    | Backend base URL (default empty = same origin)     |
 
 ---
 
@@ -237,11 +242,3 @@ Neuronote Study helps students turn lecture slides and PDFs into study materials
 - **Testing:** Expand tests (e.g. OpenAI integration mocked); add frontend tests.
 
 ---
-
-## Resume-Ready Project Summary
-
-**Neuronote Study** — Full-stack AI study app (Django, React, OpenAI). Users upload PDFs; the app extracts text, generates summaries and titles with GPT-4o-mini, and supports per-note multiple-choice flashcards and contextual chat. Includes auth (token/session, password reset, rate-limited username changes), a multi-page notebook, and an API test suite covering auth, notes, and security. Built with Django REST Framework, React, MUI, and production-oriented config (env-based settings, WhiteNoise, Gunicorn-ready).
-
----
-
-*README structured for quick scanning (title, one-line pitch, highlights), then overview, features, tech stack, architecture, setup, env vars, workflow, technical depth, and resume summary—with no invented features; all claims match the codebase.*
